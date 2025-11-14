@@ -42,7 +42,7 @@ Resources:
   SampleTable:
     Type: AWS::Serverless::SimpleTable
     Properties:
-      TableName: arda-file-v1
+      TableName: arda9-file-v1
       PrimaryKey:
         Name: Id
         Type: String
