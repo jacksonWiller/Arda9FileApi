@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.0.11121.172 d18.0
+VisualStudioVersion = 18.0.11121.172
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{DEAF7F92-411E-4FE7-823B-C4F5DB41BBF8}"
 EndProject
@@ -16,7 +16,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		template.yaml = template.yaml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arda9FileApi", "src\Arda9UserApi\Arda9FileApi.csproj", "{23212454-0C81-437D-4FDA-24AEFC7716A7}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Arda9FileApi", "src\Arda9FileApi\Arda9FileApi.csproj", "{491622DB-331A-A93F-6DB1-DF0AC7AD7EF1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,17 +28,17 @@ Global
 		{923A8DB8-35F2-4671-8BC2-A7BB8B639348}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{923A8DB8-35F2-4671-8BC2-A7BB8B639348}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{923A8DB8-35F2-4671-8BC2-A7BB8B639348}.Release|Any CPU.Build.0 = Release|Any CPU
-		{23212454-0C81-437D-4FDA-24AEFC7716A7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{23212454-0C81-437D-4FDA-24AEFC7716A7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{23212454-0C81-437D-4FDA-24AEFC7716A7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{23212454-0C81-437D-4FDA-24AEFC7716A7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{491622DB-331A-A93F-6DB1-DF0AC7AD7EF1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{491622DB-331A-A93F-6DB1-DF0AC7AD7EF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{491622DB-331A-A93F-6DB1-DF0AC7AD7EF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{491622DB-331A-A93F-6DB1-DF0AC7AD7EF1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{923A8DB8-35F2-4671-8BC2-A7BB8B639348} = {5527D965-E863-4E48-8EC1-713E276D1BBD}
-		{23212454-0C81-437D-4FDA-24AEFC7716A7} = {DEAF7F92-411E-4FE7-823B-C4F5DB41BBF8}
+		{491622DB-331A-A93F-6DB1-DF0AC7AD7EF1} = {DEAF7F92-411E-4FE7-823B-C4F5DB41BBF8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7B14B097-9499-48F5-9072-4E8D3B45ACCE}
