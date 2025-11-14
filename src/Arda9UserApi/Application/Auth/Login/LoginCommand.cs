@@ -1,7 +1,7 @@
 using Ardalis.Result;
 using MediatR;
 
-namespace Arda9UserApi.Application.Auth.Login;
+namespace Arda9FileApi.Application.Auth.Login;
 
 public class LoginCommand : IRequest<Result<LoginResponse>>
 {

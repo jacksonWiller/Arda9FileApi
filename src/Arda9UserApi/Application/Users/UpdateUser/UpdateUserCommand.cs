@@ -1,8 +1,8 @@
-using Arda9UserApi.Core;
+using Arda9FileApi.Core;
 using Ardalis.Result;
 using MediatR;
 
-namespace Arda9UserApi.Application.Users.UpdateUser;
+namespace Arda9FileApi.Application.Users.UpdateUser;
 
 public class UpdateUserCommand : IRequest<Result<UpdateUserResponse>>
 {

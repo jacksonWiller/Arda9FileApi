@@ -1,6 +1,6 @@
-using Arda9UserApi.Application.Buckets.DTOs;
+using Arda9FileApi.Application.Buckets.DTOs;
 
-namespace Arda9UserApi.Infrastructure.Repositories;
+namespace Arda9FileApi.Infrastructure.Repositories;
 
 public interface IBucketRepository
 {

@@ -1,6 +1,6 @@
-using Arda9UserApi.Application.DTOs;
+using Arda9FileApi.Application.DTOs;
 
-namespace Arda9UserApi.Application.Users.GetUserById;
+namespace Arda9FileApi.Application.Users.GetUserById;
 
 public class GetUserByIdQueryResponse
 {

@@ -1,9 +1,9 @@
-using Arda9UserApi.Api.Models;
+using Arda9FileApi.Api.Models;
 using Ardalis.Result;
 using Microsoft.AspNetCore.Mvc;
 using IResult = Ardalis.Result.IResult;
 
-namespace Arda9UserApi.Api.Extensions;
+namespace Arda9FileApi.Api.Extensions;
 
 internal static class ResultExtensions
 {

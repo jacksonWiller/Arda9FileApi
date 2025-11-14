@@ -1,6 +1,6 @@
 using Amazon.DynamoDBv2.DataModel;
 
-namespace Arda9UserApi.Application.Buckets.DTOs;
+namespace Arda9FileApi.Application.Buckets.DTOs;
 
 /// <summary>
 /// DTO for Bucket with DynamoDB annotations

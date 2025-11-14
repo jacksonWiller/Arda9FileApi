@@ -1,6 +1,6 @@
-using Arda9UserApi.Application.DTOs;
+using Arda9FileApi.Application.DTOs;
 
-namespace Arda9UserApi.Application.Users.GetUserByEmail;
+namespace Arda9FileApi.Application.Users.GetUserByEmail;
 
 public class GetUserByEmailQueryResponse
 {

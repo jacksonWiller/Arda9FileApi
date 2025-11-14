@@ -1,4 +1,4 @@
-namespace Arda9UserApi.Application.Auth.ResendCode;
+namespace Arda9FileApi.Application.Auth.ResendCode;
 
 public class ResendCodeResponse
 {

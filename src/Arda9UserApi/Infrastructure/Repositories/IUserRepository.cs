@@ -1,6 +1,6 @@
 using Arda9FileApi.Domain.Entities.UserAggregate;
 
-namespace Arda9UserApi.Infrastructure.Repositories;
+namespace Arda9FileApi.Infrastructure.Repositories;
 
 /// <summary>
 /// Repositório de User para operações CRUD no DynamoDB

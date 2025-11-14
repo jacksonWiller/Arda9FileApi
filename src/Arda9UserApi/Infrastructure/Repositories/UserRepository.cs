@@ -1,10 +1,10 @@
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
 using Arda9FileApi.Domain.Entities.UserAggregate;
-using Arda9UserApi.Application.DTOs;
+using Arda9FileApi.Application.DTOs;
 using AutoMapper;
 
-namespace Arda9UserApi.Infrastructure.Repositories;
+namespace Arda9FileApi.Infrastructure.Repositories;
 
 public class UserRepository : IUserRepository
 {

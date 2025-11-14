@@ -1,14 +1,14 @@
 using System.Net.Mime;
-using Arda9UserApi.Api.Extensions;
-using Arda9UserApi.Application.Buckets.Commands.CreateBucket;
-using Arda9UserApi.Application.Buckets.Commands.DeleteBucket;
-using Arda9UserApi.Application.Buckets.Queries.GetAllBuckets;
-using Arda9UserApi.Application.Buckets.Queries.GetBucketById;
+using Arda9FileApi.Api.Extensions;
+using Arda9FileApi.Application.Buckets.Commands.CreateBucket;
+using Arda9FileApi.Application.Buckets.Commands.DeleteBucket;
+using Arda9FileApi.Application.Buckets.Queries.GetAllBuckets;
+using Arda9FileApi.Application.Buckets.Queries.GetBucketById;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Arda9UserApi.Controllers;
+namespace Arda9FileApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

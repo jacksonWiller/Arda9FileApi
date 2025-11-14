@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace Arda9UserApi.Application.Buckets.Commands.CreateBucket;
+namespace Arda9FileApi.Application.Buckets.Commands.CreateBucket;
 
 public class CreateBucketValidator : AbstractValidator<CreateBucketCommand>
 {

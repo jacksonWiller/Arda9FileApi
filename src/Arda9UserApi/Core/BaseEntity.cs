@@ -2,7 +2,7 @@ using Catalog.Core.SharedKernel;
 using System;
 using System.Collections.Generic;
 
-namespace Arda9UserApi.Core;
+namespace Arda9FileApi.Core;
 
 /// <summary>
 /// Represents an abstract base entity class.

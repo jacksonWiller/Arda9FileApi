@@ -1,9 +1,9 @@
-using Arda9UserApi.Application.Extensions;
-using Arda9UserApi.Application.Services;
+using Arda9FileApi.Application.Extensions;
+using Arda9FileApi.Application.Services;
 using Ardalis.Result;
 using MediatR;
 
-namespace Arda9UserApi.Application.Auth.GetUserInfo;
+namespace Arda9FileApi.Application.Auth.GetUserInfo;
 
 public class GetUserInfoQueryHandler : IRequestHandler<GetUserInfoQuery, Result<UserInfoResponse>>
 {

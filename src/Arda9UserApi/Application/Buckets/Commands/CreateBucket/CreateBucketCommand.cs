@@ -1,7 +1,7 @@
 using Ardalis.Result;
 using MediatR;
 
-namespace Arda9UserApi.Application.Buckets.Commands.CreateBucket;
+namespace Arda9FileApi.Application.Buckets.Commands.CreateBucket;
 
 public class CreateBucketCommand : IRequest<Result<CreateBucketResponse>>
 {

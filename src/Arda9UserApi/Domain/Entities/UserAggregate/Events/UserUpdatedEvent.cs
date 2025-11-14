@@ -1,7 +1,7 @@
 using Arda9FileApi.Domain.Entities.UserAggregate;
-using Arda9UserApi.Core;
+using Arda9FileApi.Core;
 
-namespace Arda9UserApi.Domain.Entities.UserAggregate.Events;
+namespace Arda9FileApi.Domain.Entities.UserAggregate.Events;
 
 public class UserUpdatedEvent : BaseEvent
 {

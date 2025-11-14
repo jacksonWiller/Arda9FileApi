@@ -1,7 +1,7 @@
 using Ardalis.Result;
 using MediatR;
 
-namespace Arda9UserApi.Application.Auth.Register;
+namespace Arda9FileApi.Application.Auth.Register;
 
 public class RegisterCommand : IRequest<Result<RegisterResponse>>
 {

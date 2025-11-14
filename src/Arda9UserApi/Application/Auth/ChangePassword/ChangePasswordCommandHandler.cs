@@ -1,10 +1,10 @@
 using Amazon.CognitoIdentityProvider.Model;
-using Arda9UserApi.Application.Extensions;
-using Arda9UserApi.Application.Services;
+using Arda9FileApi.Application.Extensions;
+using Arda9FileApi.Application.Services;
 using Ardalis.Result;
 using MediatR;
 
-namespace Arda9UserApi.Application.Auth.ChangePassword;
+namespace Arda9FileApi.Application.Auth.ChangePassword;
 
 public class ChangePasswordCommandHandler : IRequestHandler<ChangePasswordCommand, Result<ChangePasswordResponse>>
 {

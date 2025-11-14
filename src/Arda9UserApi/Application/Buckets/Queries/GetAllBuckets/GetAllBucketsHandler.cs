@@ -1,10 +1,10 @@
 using Amazon.S3;
 using Ardalis.Result;
-using Arda9UserApi.Application.Buckets.DTOs;
-using Arda9UserApi.Infrastructure.Repositories;
+using Arda9FileApi.Application.Buckets.DTOs;
+using Arda9FileApi.Infrastructure.Repositories;
 using MediatR;
 
-namespace Arda9UserApi.Application.Buckets.Queries.GetAllBuckets;
+namespace Arda9FileApi.Application.Buckets.Queries.GetAllBuckets;
 
 public class GetAllBucketsHandler : IRequestHandler<GetAllBucketsQuery, Result<GetAllBucketsResponse>>
 {

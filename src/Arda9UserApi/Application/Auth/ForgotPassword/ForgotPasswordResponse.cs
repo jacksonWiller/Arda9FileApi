@@ -1,4 +1,4 @@
-namespace Arda9UserApi.Application.Auth.ForgotPassword;
+namespace Arda9FileApi.Application.Auth.ForgotPassword;
 
 public class ForgotPasswordResponse
 {

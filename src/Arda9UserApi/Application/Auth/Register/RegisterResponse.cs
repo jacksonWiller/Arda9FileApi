@@ -1,4 +1,4 @@
-namespace Arda9UserApi.Application.Auth.Register;
+namespace Arda9FileApi.Application.Auth.Register;
 
 public class RegisterResponse
 {

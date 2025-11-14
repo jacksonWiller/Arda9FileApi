@@ -1,7 +1,7 @@
 using Ardalis.Result;
 using MediatR;
 
-namespace Arda9UserApi.Application.Auth.ConfirmEmail;
+namespace Arda9FileApi.Application.Auth.ConfirmEmail;
 
 public class ConfirmEmailCommand : IRequest<Result<ConfirmEmailResponse>>
 {

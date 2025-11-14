@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace Arda9UserApi.Api.Models;
+namespace Arda9FileApi.Api.Models;
 
 [method: JsonConstructor]
 public sealed class ApiErrorResponse(string message)

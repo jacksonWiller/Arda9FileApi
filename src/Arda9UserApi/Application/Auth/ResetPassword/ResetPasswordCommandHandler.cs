@@ -1,10 +1,10 @@
 using Amazon.CognitoIdentityProvider.Model;
-using Arda9UserApi.Application.Extensions;
-using Arda9UserApi.Application.Services;
+using Arda9FileApi.Application.Extensions;
+using Arda9FileApi.Application.Services;
 using Ardalis.Result;
 using MediatR;
 
-namespace Arda9UserApi.Application.Auth.ResetPassword;
+namespace Arda9FileApi.Application.Auth.ResetPassword;
 
 public class ResetPasswordCommandHandler : IRequestHandler<ResetPasswordCommand, Result<ResetPasswordResponse>>
 {

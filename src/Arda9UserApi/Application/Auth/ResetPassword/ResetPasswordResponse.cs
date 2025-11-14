@@ -1,4 +1,4 @@
-namespace Arda9UserApi.Application.Auth.ResetPassword;
+namespace Arda9FileApi.Application.Auth.ResetPassword;
 
 public class ResetPasswordResponse
 {

@@ -1,9 +1,9 @@
 using Arda9FileApi.Domain.Entities.UserAggregate;
 using Arda9FileApi.Domain.ValueObjects;
-using Arda9UserApi.Application.DTOs;
+using Arda9FileApi.Application.DTOs;
 using AutoMapper;
 
-namespace Arda9UserApi.Infrastructure.Mappings;
+namespace Arda9FileApi.Infrastructure.Mappings;
 
 public class UserMappingProfile : Profile
 {

@@ -1,6 +1,6 @@
-using Arda9UserApi.Application.Buckets.DTOs;
+using Arda9FileApi.Application.Buckets.DTOs;
 
-namespace Arda9UserApi.Application.Buckets.Commands.CreateBucket;
+namespace Arda9FileApi.Application.Buckets.Commands.CreateBucket;
 
 public class CreateBucketResponse
 {

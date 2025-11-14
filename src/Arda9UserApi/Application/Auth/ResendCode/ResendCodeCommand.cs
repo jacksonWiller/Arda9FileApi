@@ -1,7 +1,7 @@
 using Ardalis.Result;
 using MediatR;
 
-namespace Arda9UserApi.Application.Auth.ResendCode;
+namespace Arda9FileApi.Application.Auth.ResendCode;
 
 public class ResendCodeCommand : IRequest<Result<ResendCodeResponse>>
 {

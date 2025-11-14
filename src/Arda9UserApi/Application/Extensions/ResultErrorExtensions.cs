@@ -1,6 +1,6 @@
 using Ardalis.Result;
 
-namespace Arda9UserApi.Application.Extensions;
+namespace Arda9FileApi.Application.Extensions;
 
 public static class ResultError
 {

@@ -1,8 +1,8 @@
-using Arda9UserApi.Application.Services;
+using Arda9FileApi.Application.Services;
 using Ardalis.Result;
 using MediatR;
 
-namespace Arda9UserApi.Application.Auth.Logout;
+namespace Arda9FileApi.Application.Auth.Logout;
 
 public class LogoutCommandHandler : IRequestHandler<LogoutCommand, Result<LogoutResponse>>
 {

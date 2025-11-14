@@ -1,7 +1,7 @@
 using Ardalis.Result;
 using MediatR;
 
-namespace Arda9UserApi.Application.Buckets.Queries.GetBucketById;
+namespace Arda9FileApi.Application.Buckets.Queries.GetBucketById;
 
 public class GetBucketByIdQuery : IRequest<Result<GetBucketByIdResponse>>
 {

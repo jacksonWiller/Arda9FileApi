@@ -1,4 +1,4 @@
-namespace Arda9UserApi.Configuration
+namespace Arda9FileApi.Configuration
 {
     public class AwsCognitoConfig
     {

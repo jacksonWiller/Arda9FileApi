@@ -1,18 +1,18 @@
-using Arda9UserApi.Application.Auth.ChangePassword;
-using Arda9UserApi.Application.Auth.ConfirmEmail;
-using Arda9UserApi.Application.Auth.ForgotPassword;
-using Arda9UserApi.Application.Auth.GetUserInfo;
-using Arda9UserApi.Application.Auth.Login;
-using Arda9UserApi.Application.Auth.Logout;
-using Arda9UserApi.Application.Auth.RefreshToken;
-using Arda9UserApi.Application.Auth.Register;
-using Arda9UserApi.Application.Auth.ResendCode;
-using Arda9UserApi.Application.Auth.ResetPassword;
+using Arda9FileApi.Application.Auth.ChangePassword;
+using Arda9FileApi.Application.Auth.ConfirmEmail;
+using Arda9FileApi.Application.Auth.ForgotPassword;
+using Arda9FileApi.Application.Auth.GetUserInfo;
+using Arda9FileApi.Application.Auth.Login;
+using Arda9FileApi.Application.Auth.Logout;
+using Arda9FileApi.Application.Auth.RefreshToken;
+using Arda9FileApi.Application.Auth.Register;
+using Arda9FileApi.Application.Auth.ResendCode;
+using Arda9FileApi.Application.Auth.ResetPassword;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Arda9UserApi.Controllers;
+namespace Arda9FileApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]

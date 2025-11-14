@@ -1,7 +1,7 @@
 using Ardalis.Result;
 using MediatR;
 
-namespace Arda9UserApi.Application.Auth.ResetPassword;
+namespace Arda9FileApi.Application.Auth.ResetPassword;
 
 public class ResetPasswordCommand : IRequest<Result<ResetPasswordResponse>>
 {

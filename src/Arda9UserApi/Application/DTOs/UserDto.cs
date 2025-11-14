@@ -1,7 +1,7 @@
 using Amazon.DynamoDBv2.DataModel;
 using Arda9FileApi.Domain.Enums;
 
-namespace Arda9UserApi.Application.DTOs;
+namespace Arda9FileApi.Application.DTOs;
 
 /// <summary>
 /// DTO for User with DynamoDB annotations

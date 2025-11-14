@@ -1,12 +1,12 @@
 using Arda9FileApi.Domain.ValueObjects;
-using Arda9UserApi.Application.DTOs;
-using Arda9UserApi.Core;
-using Arda9UserApi.Infrastructure.Repositories;
+using Arda9FileApi.Application.DTOs;
+using Arda9FileApi.Core;
+using Arda9FileApi.Infrastructure.Repositories;
 using Ardalis.Result;
 using AutoMapper;
 using MediatR;
 
-namespace Arda9UserApi.Application.Users.UpdateUser;
+namespace Arda9FileApi.Application.Users.UpdateUser;
 
 public class UpdateUserHandler : IRequestHandler<UpdateUserCommand, Result<UpdateUserResponse>>
 {

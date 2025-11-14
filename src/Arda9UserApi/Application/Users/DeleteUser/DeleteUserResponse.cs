@@ -1,4 +1,4 @@
-namespace Arda9UserApi.Application.Users.DeleteUser;
+namespace Arda9FileApi.Application.Users.DeleteUser;
 
 public class DeleteUserResponse
 {

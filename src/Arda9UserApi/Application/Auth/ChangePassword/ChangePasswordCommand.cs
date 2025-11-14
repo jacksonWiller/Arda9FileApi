@@ -1,7 +1,7 @@
 using Ardalis.Result;
 using MediatR;
 
-namespace Arda9UserApi.Application.Auth.ChangePassword;
+namespace Arda9FileApi.Application.Auth.ChangePassword;
 
 public class ChangePasswordCommand : IRequest<Result<ChangePasswordResponse>>
 {

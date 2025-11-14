@@ -1,7 +1,7 @@
 using Ardalis.Result;
 using MediatR;
 
-namespace Arda9UserApi.Application.Users.CreateUser;
+namespace Arda9FileApi.Application.Users.CreateUser;
 
 public class CreateUserCommand : IRequest<Result<CreateUserResponse>>
 {

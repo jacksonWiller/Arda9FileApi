@@ -1,9 +1,9 @@
-using Arda9UserApi.Core;
-using Arda9UserApi.Infrastructure.Repositories;
+using Arda9FileApi.Core;
+using Arda9FileApi.Infrastructure.Repositories;
 using Ardalis.Result;
 using MediatR;
 
-namespace Arda9UserApi.Application.Users.DeleteUser;
+namespace Arda9FileApi.Application.Users.DeleteUser;
 
 public class DeleteUserHandler : IRequestHandler<DeleteUserCommand, Result<DeleteUserResponse>>
 {

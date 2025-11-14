@@ -1,7 +1,7 @@
 using System;
 using MediatR;
 
-namespace Arda9UserApi.Core;
+namespace Arda9FileApi.Core;
 
 /// <summary>
 /// Represents a base event.

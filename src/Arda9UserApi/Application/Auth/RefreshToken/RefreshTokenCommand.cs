@@ -1,7 +1,7 @@
 using Ardalis.Result;
 using MediatR;
 
-namespace Arda9UserApi.Application.Auth.RefreshToken;
+namespace Arda9FileApi.Application.Auth.RefreshToken;
 
 public class RefreshTokenCommand : IRequest<Result<RefreshTokenResponse>>
 {

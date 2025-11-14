@@ -1,4 +1,4 @@
-namespace Arda9UserApi.Application.DTOs;
+namespace Arda9FileApi.Application.DTOs;
 
 public class ResendCodeRequest
 {

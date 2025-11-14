@@ -1,6 +1,6 @@
-using Arda9UserApi.Application.Buckets.DTOs;
+using Arda9FileApi.Application.Buckets.DTOs;
 
-namespace Arda9UserApi.Application.Buckets.Queries.GetAllBuckets;
+namespace Arda9FileApi.Application.Buckets.Queries.GetAllBuckets;
 
 public class GetAllBucketsResponse
 {

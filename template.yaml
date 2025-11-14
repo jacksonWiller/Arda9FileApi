@@ -1,7 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  Sample SAM Template for Arda9UserApiV1
+  Sample SAM Template for Arda9FileApiV1
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -13,8 +13,8 @@ Resources:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
       Description: A simple example includes a .NET Core WebAPI App with DynamoDB table.
-      CodeUri: ./src/Arda9UserApi/
-      Handler: Arda9UserApi
+      CodeUri: ./src/Arda9FileApi/
+      Handler: Arda9FileApi
       Runtime: dotnet8
       MemorySize: 1024
       Environment: # More info about Env Vars: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#environment-object
@@ -42,7 +42,7 @@ Resources:
   SampleTable:
     Type: AWS::Serverless::SimpleTable
     Properties:
-      TableName: arda-user-v1
+      TableName: arda-file-v1
       PrimaryKey:
         Name: Id
         Type: String

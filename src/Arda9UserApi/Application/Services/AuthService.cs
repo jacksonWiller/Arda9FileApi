@@ -1,11 +1,11 @@
 using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
-using Arda9UserApi.Configuration;
+using Arda9FileApi.Configuration;
 using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Arda9UserApi.Application.Services;
+namespace Arda9FileApi.Application.Services;
 
 public interface IAuthService
 {

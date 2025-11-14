@@ -1,15 +1,14 @@
-using Arda9UserApi.Api.Extensions;
-using Arda9UserApi.Application.Users.CreateUser;
-using Arda9UserApi.Application.Users.DeleteUser;
-using Arda9UserApi.Application.Users.GetUserByEmail;
-using Arda9UserApi.Application.Users.GetUserById;
-using Arda9UserApi.Application.Users.GetUsersByCompany;
-using Arda9UserApi.Application.Users.UpdateUser;
+using Arda9FileApi.Api.Extensions;
+using Arda9FileApi.Application.Users.CreateUser;
+using Arda9FileApi.Application.Users.DeleteUser;
+using Arda9FileApi.Application.Users.GetUserByEmail;
+using Arda9FileApi.Application.Users.GetUserById;
+using Arda9FileApi.Application.Users.GetUsersByCompany;
+using Arda9FileApi.Application.Users.UpdateUser;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Arda9UserApi.Controllers;
+namespace Arda9FileApi.Controllers;
 
 [Route("api/companies/{companyId}/[controller]")]
 [ApiController]

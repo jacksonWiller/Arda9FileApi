@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using MediatR;
 
-namespace Arda9UserApi.Core.Behaviors;
+namespace Arda9FileApi.Core.Behaviors;
 
 public class LoggingBehavior<TRequest, TResponse> : IPipelineBehavior<TRequest, TResponse>
     where TRequest : IRequest<TResponse>

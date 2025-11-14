@@ -1,6 +1,6 @@
 using Amazon.DynamoDBv2.DataModel;
 
-namespace Arda9UserApi.Application.DTOs;
+namespace Arda9FileApi.Application.DTOs;
 
 /// <summary>
 /// DTO para representar um Book nas respostas da API e persistência no DynamoDB

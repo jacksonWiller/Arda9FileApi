@@ -1,4 +1,4 @@
-namespace Arda9UserApi.Application.Auth.GetUserInfo;
+namespace Arda9FileApi.Application.Auth.GetUserInfo;
 
 public class UserInfoResponse
 {

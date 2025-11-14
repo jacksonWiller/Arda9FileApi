@@ -1,5 +1,5 @@
 using Arda9FileApi.Domain.Entities.UserAggregate;
-using Arda9UserApi.Core;
+using Arda9FileApi.Core;
 
 namespace Catalog.Domain.Entities.UserAggregate.Events;
 

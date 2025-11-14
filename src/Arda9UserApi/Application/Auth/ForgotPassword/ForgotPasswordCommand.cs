@@ -1,7 +1,7 @@
 using Ardalis.Result;
 using MediatR;
 
-namespace Arda9UserApi.Application.Auth.ForgotPassword;
+namespace Arda9FileApi.Application.Auth.ForgotPassword;
 
 public class ForgotPasswordCommand : IRequest<Result<ForgotPasswordResponse>>
 {

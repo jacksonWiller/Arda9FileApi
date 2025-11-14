@@ -1,8 +1,8 @@
 using Arda9FileApi.Domain.Entities.UserAggregate.Events;
 using Arda9FileApi.Domain.Enums;
 using Arda9FileApi.Domain.ValueObjects;
-using Arda9UserApi.Core;
-using Arda9UserApi.Domain.Entities.UserAggregate.Events;
+using Arda9FileApi.Core;
+using Arda9FileApi.Domain.Entities.UserAggregate.Events;
 using Catalog.Core.SharedKernel;
 using Catalog.Domain.Entities.UserAggregate.Events;
 
