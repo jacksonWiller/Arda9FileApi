@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace Catalog.Domain.ValueObjects;
+namespace Arda9FileApi.Domain.ValueObjects;
 
 /// <summary>
 /// Value Object for Email: RFC 5322 format, lowercase, trimmed

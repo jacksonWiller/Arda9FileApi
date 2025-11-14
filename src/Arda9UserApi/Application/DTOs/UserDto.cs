@@ -1,5 +1,5 @@
 using Amazon.DynamoDBv2.DataModel;
-using Catalog.Domain.Enums;
+using Arda9FileApi.Domain.Enums;
 
 namespace Arda9UserApi.Application.DTOs;
 

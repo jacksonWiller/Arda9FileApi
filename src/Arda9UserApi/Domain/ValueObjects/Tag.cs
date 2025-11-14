@@ -1,6 +1,6 @@
 using System;
 
-namespace Catalog.Domain.ValueObjects;
+namespace Arda9FileApi.Domain.ValueObjects;
 
 public class Tag
 {

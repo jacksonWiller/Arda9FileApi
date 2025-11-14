@@ -1,3 +1,4 @@
+using Arda9FileApi.Domain.Entities.UserAggregate;
 using Arda9UserApi.Core;
 
 namespace Arda9UserApi.Domain.Entities.UserAggregate.Events;

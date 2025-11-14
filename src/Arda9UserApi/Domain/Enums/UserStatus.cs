@@ -1,4 +1,4 @@
-namespace Catalog.Domain.Enums;
+namespace Arda9FileApi.Domain.Enums;
 
 /// <summary>
 /// User Status enum

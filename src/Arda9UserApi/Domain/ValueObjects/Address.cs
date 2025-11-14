@@ -1,4 +1,4 @@
-namespace Catalog.Domain.ValueObjects;
+namespace Arda9FileApi.Domain.ValueObjects;
 
 /// <summary>
 /// Value Object for Address

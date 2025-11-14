@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace Catalog.Domain.ValueObjects;
+namespace Arda9FileApi.Domain.ValueObjects;
 
 /// <summary>
 /// Value Object for Slug: ^[a-z0-9]+(?:-[a-z0-9]+)*$, 3-60 chars, globally unique

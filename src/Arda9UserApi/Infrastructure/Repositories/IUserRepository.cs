@@ -1,4 +1,4 @@
-using Arda9UserApi.Domain.Entities.UserAggregate;
+using Arda9FileApi.Domain.Entities.UserAggregate;
 
 namespace Arda9UserApi.Infrastructure.Repositories;
 

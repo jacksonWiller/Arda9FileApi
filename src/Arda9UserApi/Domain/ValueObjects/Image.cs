@@ -1,6 +1,6 @@
 using System;
 
-namespace Catalog.Domain.ValueObjects;
+namespace Arda9FileApi.Domain.ValueObjects;
 public class Image 
 {
     public Guid Id { get; private set; } = Guid.NewGuid();

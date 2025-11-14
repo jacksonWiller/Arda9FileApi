@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace Catalog.Domain.ValueObjects;
+namespace Arda9FileApi.Domain.ValueObjects;
 
 /// <summary>
 /// Value Object for URL: valid HTTP/HTTPS URL

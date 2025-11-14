@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace Catalog.Domain.ValueObjects;
+namespace Arda9FileApi.Domain.ValueObjects;
 
 /// <summary>
 /// Value Object for Company Document (CNPJ for BR, EIN for US, etc.)

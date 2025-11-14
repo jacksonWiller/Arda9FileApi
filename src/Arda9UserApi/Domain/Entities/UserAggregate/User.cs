@@ -1,11 +1,12 @@
+using Arda9FileApi.Domain.Entities.UserAggregate.Events;
+using Arda9FileApi.Domain.Enums;
+using Arda9FileApi.Domain.ValueObjects;
 using Arda9UserApi.Core;
 using Arda9UserApi.Domain.Entities.UserAggregate.Events;
 using Catalog.Core.SharedKernel;
 using Catalog.Domain.Entities.UserAggregate.Events;
-using Catalog.Domain.Enums;
-using Catalog.Domain.ValueObjects;
 
-namespace Arda9UserApi.Domain.Entities.UserAggregate;
+namespace Arda9FileApi.Domain.Entities.UserAggregate;
 
 public class User : BaseEntity, IAggregateRoot
 {

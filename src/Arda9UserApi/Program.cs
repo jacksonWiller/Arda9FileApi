@@ -2,6 +2,7 @@ using Amazon;
 using Amazon.CognitoIdentityProvider;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
+using Amazon.S3;
 using Amazon.SecretsManager;
 using Arda9UserApi.Application.Services;
 using Arda9UserApi.Configuration;
@@ -79,9 +80,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new() { 
-        Title = "Books API", 
+        Title = "Arda9 User API", 
         Version = "v1",
-        Description = "API para gerenciamento de livros usando AWS Lambda e DynamoDB com CQRS customizado"
+        Description = "API para gerenciamento de usuários, autenticação e buckets usando AWS Lambda, DynamoDB, Cognito e S3"
     });
 
     // Configuração para autenticação JWT no Swagger
@@ -110,14 +111,26 @@ builder.Services.AddSwaggerGen(c =>
     });
 });
 
-string awsRegion = Environment.GetEnvironmentVariable("AWS_REGION") ?? RegionEndpoint.USEast2.SystemName;
+// Configuração da região AWS
+string awsRegion = Environment.GetEnvironmentVariable("AWS_REGION") ?? RegionEndpoint.USEast1.SystemName;
+var regionEndpoint = RegionEndpoint.GetBySystemName(awsRegion);
+
+// Registrar serviços AWS
 builder.Services
-        .AddSingleton<IAmazonDynamoDB>(new AmazonDynamoDBClient(RegionEndpoint.GetBySystemName(awsRegion)))
-        .AddSingleton<IAmazonCognitoIdentityProvider>(new AmazonCognitoIdentityProviderClient(RegionEndpoint.GetBySystemName(awsRegion)))
-        .AddSingleton<IAmazonSecretsManager>(new AmazonSecretsManagerClient(RegionEndpoint.GetBySystemName(awsRegion)))
-        .AddScoped<IDynamoDBContext, DynamoDBContext>()
-        .AddScoped<IUserRepository, UserRepository>()
-        .AddScoped<IAuthService, AuthService>();
+    .AddSingleton<IAmazonDynamoDB>(new AmazonDynamoDBClient(regionEndpoint))
+    .AddSingleton<IAmazonCognitoIdentityProvider>(new AmazonCognitoIdentityProviderClient(regionEndpoint))
+    .AddSingleton<IAmazonSecretsManager>(new AmazonSecretsManagerClient(regionEndpoint))
+    .AddSingleton<IAmazonS3>(new AmazonS3Client(regionEndpoint))
+    .AddScoped<IDynamoDBContext, DynamoDBContext>();
+
+// Registrar Repositories
+builder.Services
+    .AddScoped<IUserRepository, UserRepository>()
+    .AddScoped<IBucketRepository, BucketRepository>();
+
+// Registrar Services
+builder.Services
+    .AddScoped<IAuthService, AuthService>();
 
 // Add AWS Lambda support
 builder.Services.AddAWSLambdaHosting(LambdaEventSource.HttpApi);
@@ -127,7 +140,7 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Books API v1");
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Arda9 User API v1");
     c.RoutePrefix = string.Empty; // Define o Swagger como página inicial
 });
 
