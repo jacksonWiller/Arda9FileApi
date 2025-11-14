@@ -1,8 +1,8 @@
 using Amazon.S3;
 using Ardalis.Result;
-using Arda9FileApi.Application.Buckets.DTOs;
 using Arda9FileApi.Infrastructure.Repositories;
 using MediatR;
+using Arda9FileApi.Application.DTOs;
 
 namespace Arda9FileApi.Application.Buckets.Queries.GetAllBuckets;
 

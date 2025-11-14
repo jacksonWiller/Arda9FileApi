@@ -6,7 +6,7 @@ namespace Arda9FileApi.Application.DTOs;
 /// DTO for Bucket with DynamoDB annotations
 /// Combines data from S3 and DynamoDB
 /// </summary>
-[DynamoDBTable("arda-bucket-v1")]
+[DynamoDBTable("arda9-file-v1")]
 public class BucketDto
 {
     [DynamoDBHashKey]

@@ -1,10 +1,8 @@
 using Amazon.S3;
 using Amazon.S3.Model;
-using Arda9FileApi.Application.Buckets.DTOs;
-using Arda9FileApi.Application.Users.CreateUser;
+using Arda9FileApi.Application.DTOs;
 using Arda9FileApi.Infrastructure.Repositories;
 using Ardalis.Result;
-using Ardalis.Result.FluentValidation;
 using FluentValidation;
 using MediatR;
 
@@ -72,7 +70,7 @@ public class CreateBucketHandler : IRequestHandler<CreateBucketCommand, Result<C
                 GSI2PK = $"BUCKET#{request.BucketName}"
             };
 
-            await _bucketRepository.CreateAsync(bucketDto);
+             await _bucketRepository.CreateAsync(bucketDto);
 
             _logger.LogInformation("Bucket {BucketName} criado com sucesso", request.BucketName);
 
