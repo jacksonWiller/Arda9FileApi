@@ -1,4 +1,4 @@
-using Arda9FileApi.Application.Buckets.DTOs;
+using Arda9FileApi.Application.DTOs;
 
 namespace Arda9FileApi.Application.Buckets.Queries.GetAllBuckets;
 

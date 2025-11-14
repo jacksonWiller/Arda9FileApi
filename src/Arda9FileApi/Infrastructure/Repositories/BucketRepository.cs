@@ -1,6 +1,6 @@
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
-using Arda9FileApi.Application.Buckets.DTOs;
+using Arda9FileApi.Application.DTOs;
 
 namespace Arda9FileApi.Infrastructure.Repositories;
 
