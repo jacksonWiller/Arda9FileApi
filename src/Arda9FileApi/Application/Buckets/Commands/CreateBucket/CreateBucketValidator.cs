@@ -13,8 +13,8 @@ public class CreateBucketValidator : AbstractValidator<CreateBucketCommand>
             .Matches("^[a-z0-9][a-z0-9-]*[a-z0-9]$")
             .WithMessage("BucketName deve conter apenas letras minúsculas, números e hífens");
 
-        RuleFor(x => x.CompanyId)
-            .NotEmpty().WithMessage("CompanyId é obrigatório");
+        //RuleFor(x => x.CompanyId)
+        //    .NotEmpty().WithMessage("CompanyId é obrigatório");
 
         RuleFor(x => x.Region)
             .Must(region => string.IsNullOrEmpty(region) || IsValidAwsRegion(region))

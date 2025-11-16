@@ -3,6 +3,7 @@ using Amazon.S3.Model;
 using Arda9FileApi.Application.DTOs;
 using Arda9FileApi.Infrastructure.Repositories;
 using Ardalis.Result;
+using Ardalis.Result.FluentValidation;
 using FluentValidation;
 using MediatR;
 
@@ -32,18 +33,18 @@ public class CreateBucketHandler : IRequestHandler<CreateBucketCommand, Result<C
         try
         {
             // Validação
-            //var validationResult = await _validator.ValidateAsync(request, cancellationToken);
-            //if (!validationResult.IsValid)
-            //{
-            //    return Result<CreateBucketResponse>.Invalid(validationResult.AsErrors());
-            //}
+            var validationResult = await _validator.ValidateAsync(request, cancellationToken);
+            if (!validationResult.IsValid)
+            {
+                return Result<CreateBucketResponse>.Invalid(validationResult.AsErrors());
+            }
 
             // Verificar se bucket já existe
-            //var existingBucket = await _bucketRepository.GetByBucketNameAsync(request.BucketName);
-            //if (existingBucket != null)
-            //{
-            //    return Result<CreateBucketResponse>.Error();
-            //}
+            var existingBucket = await _bucketRepository.GetByBucketNameAsync(request.BucketName);
+            if (existingBucket != null)
+            {
+                return Result<CreateBucketResponse>.Error();
+            }
 
             // Criar bucket no S3
             var bucketRequest = new PutBucketRequest
