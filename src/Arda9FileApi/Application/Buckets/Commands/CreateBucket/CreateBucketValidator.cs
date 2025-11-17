@@ -13,17 +13,6 @@ public class CreateBucketValidator : AbstractValidator<CreateBucketCommand>
             .Matches("^[a-z0-9][a-z0-9-]*[a-z0-9]$")
             .WithMessage("BucketName deve conter apenas letras minúsculas, números e hífens");
 
-        //RuleFor(x => x.CompanyId)
-        //    .NotEmpty().WithMessage("CompanyId é obrigatório");
 
-        RuleFor(x => x.Region)
-            .Must(region => string.IsNullOrEmpty(region) || IsValidAwsRegion(region))
-            .WithMessage("Region inválida");
-    }
-
-    private bool IsValidAwsRegion(string region)
-    {
-        var validRegions = new[] { "us-east-1", "us-west-2", "eu-west-1", "sa-east-1" };
-        return validRegions.Contains(region);
     }
 }

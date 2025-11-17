@@ -1,7 +1,6 @@
 using Arda9FileApi.Domain.Entities.UserAggregate;
 using Arda9FileApi.Domain.ValueObjects;
 using Arda9FileApi.Application.DTOs;
-using Arda9FileApi.Domain.Entities.UserAggregate;
 using Arda9FileApi.Infrastructure.Repositories;
 using Ardalis.Result;
 using Ardalis.Result.FluentValidation;

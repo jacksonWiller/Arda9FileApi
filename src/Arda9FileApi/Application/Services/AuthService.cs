@@ -1,5 +1,6 @@
 using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
+using Arda9FileApi.Application.Auth.GetUserInfo;
 using Arda9FileApi.Configuration;
 using Microsoft.Extensions.Options;
 using System.Security.Cryptography;
@@ -20,6 +21,7 @@ public interface IAuthService
     Task ChangePasswordAsync(string accessToken, string oldPassword, string newPassword);
     Task GlobalSignOutAsync(string accessToken);
     Task<GetUserResponse> GetUserAsync(string accessToken);
+    Task<UserInfoResponse> GetUserInfoAsync(string accessToken);
 }
 
 public class AuthService : IAuthService
@@ -219,5 +221,27 @@ public class AuthService : IAuthService
         };
 
         return await cognitoClient.GetUserAsync(getUserRequest);
+    }
+
+    public async Task<UserInfoResponse> GetUserInfoAsync(string accessToken)
+    {
+        var getUserRequest = new GetUserRequest
+        {
+            AccessToken = accessToken
+        };
+
+        var response = await cognitoClient.GetUserAsync(getUserRequest);
+
+        var userInfo = new UserInfoResponse
+        {
+            Username = response.Username,
+            Email = response.UserAttributes.FirstOrDefault(a => a.Name == "email")?.Value ?? string.Empty,
+            Name = response.UserAttributes.FirstOrDefault(a => a.Name == "name")?.Value ?? string.Empty,
+            PhoneNumber = response.UserAttributes.FirstOrDefault(a => a.Name == "phone_number")?.Value,
+            EmailVerified = bool.Parse(response.UserAttributes.FirstOrDefault(a => a.Name == "email_verified")?.Value ?? "false"),
+            Sub = response.UserAttributes.FirstOrDefault(a => a.Name == "sub")?.Value ?? string.Empty
+        };
+
+        return userInfo;
     }
 }

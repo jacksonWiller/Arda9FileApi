@@ -1,11 +1,13 @@
 using Amazon.S3;
 using Amazon.S3.Model;
 using Arda9FileApi.Application.DTOs;
+using Arda9FileApi.Application.Services;
 using Arda9FileApi.Infrastructure.Repositories;
 using Ardalis.Result;
 using Ardalis.Result.FluentValidation;
 using FluentValidation;
 using MediatR;
+using System.Security.Claims;
 
 namespace Arda9FileApi.Application.Buckets.Commands.CreateBucket;
 
@@ -15,16 +17,22 @@ public class CreateBucketHandler : IRequestHandler<CreateBucketCommand, Result<C
     private readonly IBucketRepository _bucketRepository;
     private readonly IValidator<CreateBucketCommand> _validator;
     private readonly ILogger<CreateBucketHandler> _logger;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    private readonly IAuthService _authService;
 
     public CreateBucketHandler(
         IAmazonS3 s3Client,
         IBucketRepository bucketRepository,
         IValidator<CreateBucketCommand> validator,
+        IAuthService authService,
+        IHttpContextAccessor httpContextAccessor,
         ILogger<CreateBucketHandler> logger)
     {
         _s3Client = s3Client;
         _bucketRepository = bucketRepository;
         _validator = validator;
+        _authService = authService;
+        _httpContextAccessor = httpContextAccessor;
         _logger = logger;
     }
 
@@ -37,6 +45,24 @@ public class CreateBucketHandler : IRequestHandler<CreateBucketCommand, Result<C
             if (!validationResult.IsValid)
             {
                 return Result<CreateBucketResponse>.Invalid(validationResult.AsErrors());
+            }
+
+            var userClaims = _httpContextAccessor.HttpContext?.User;
+            if (userClaims == null || !userClaims.Identity?.IsAuthenticated == true)
+            {
+                _logger.LogWarning("Usuário não autenticado");
+                return Result<CreateBucketResponse>.Unauthorized();
+            }
+
+
+            // Extrair o ID do usuário (sub claim do Cognito)
+            var userId = userClaims.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                         ?? userClaims.FindFirst("sub")?.Value;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("Claim 'sub' não encontrada no token");
+                return Result<CreateBucketResponse>.Unauthorized();
             }
 
             // Verificar se bucket já existe
@@ -60,13 +86,13 @@ public class CreateBucketHandler : IRequestHandler<CreateBucketCommand, Result<C
             {
                 Id = Guid.NewGuid(),
                 BucketName = request.BucketName,
-                CompanyId = request.CompanyId,
-                SubCompanyId = request.SubCompanyId,
-                Region = request.Region ?? "us-east-1",
+                CompanyId = request.TenantId,
+                Region = "us-east-1",
                 Status = "Active",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
-                CreatedBy = request.CreatedBy
+                CreatedBy = Guid.TryParse(userId, out var userGuid) ? userGuid : null
+
             };
 
              await _bucketRepository.CreateAsync(bucketDto);

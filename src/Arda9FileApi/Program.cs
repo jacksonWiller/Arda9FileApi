@@ -3,6 +3,7 @@ using Amazon.CognitoIdentityProvider;
 using Amazon.DynamoDBv2;
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.S3;
+using Amazon.S3Control;
 using Amazon.SecretsManager;
 using Arda9FileApi.Application.Services;
 using Arda9FileApi.Configuration;
@@ -122,6 +123,7 @@ builder.Services
     .AddSingleton<IAmazonCognitoIdentityProvider>(new AmazonCognitoIdentityProviderClient(regionEndpoint))
     .AddSingleton<IAmazonSecretsManager>(new AmazonSecretsManagerClient(regionEndpoint))
     .AddSingleton<IAmazonS3>(new AmazonS3Client(regionEndpoint))
+    .AddSingleton<IAmazonS3Control>(new AmazonS3ControlClient(regionEndpoint))
     .AddScoped<IDynamoDBContext, DynamoDBContext>();
 
 // Registrar Repositories
