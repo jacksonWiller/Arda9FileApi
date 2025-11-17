@@ -32,14 +32,13 @@ public class BucketRepository : IBucketRepository
     {
         try
         {
-            var search = _context.QueryAsync<BucketDto>(
-                $"BUCKET#{bucketName}",
-                new DynamoDBOperationConfig
-                {
-                    IndexName = "BucketNameIndex"
-                }
-            );
+            var conditions = new List<ScanCondition>
+            {
+                new ScanCondition("BucketName", ScanOperator.Equal, bucketName),
+                new ScanCondition("Status", ScanOperator.NotEqual, "deleted")
+            };
 
+            var search = _context.ScanAsync<BucketDto>(conditions);
             var results = await search.GetNextSetAsync();
             return results.FirstOrDefault();
         }
@@ -116,7 +115,20 @@ public class BucketRepository : IBucketRepository
     {
         try
         {
-            await _context.DeleteAsync<BucketDto>(id);
+            var bucket = await _context.LoadAsync<BucketDto>(id);
+            
+            if (bucket == null)
+            {
+                _logger.LogWarning("Bucket não encontrado para soft delete: {Id}", id);
+                throw new KeyNotFoundException($"Bucket com ID {id} não encontrado");
+            }
+
+            bucket.Status = "deleted";
+            bucket.UpdatedAt = DateTime.UtcNow;
+            
+            await _context.SaveAsync(bucket);
+            
+            _logger.LogInformation("Bucket marcado como deletado: {Id}", id);
         }
         catch (Exception ex)
         {

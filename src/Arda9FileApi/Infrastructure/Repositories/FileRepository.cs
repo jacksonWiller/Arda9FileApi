@@ -8,11 +8,16 @@ public class FileRepository : IFileRepository
 {
     private readonly IDynamoDBContext _context;
     private readonly ILogger<FileRepository> _logger;
+    private readonly IBucketRepository _bucketRepository;
 
-    public FileRepository(IDynamoDBContext context, ILogger<FileRepository> logger)
+    public FileRepository(
+        IDynamoDBContext context, 
+        ILogger<FileRepository> logger,
+        IBucketRepository bucketRepository)
     {
         _context = context;
         _logger = logger;
+        _bucketRepository = bucketRepository;
     }
 
     public async Task<FileMetadataDto?> GetByIdAsync(Guid fileId)
@@ -112,7 +117,32 @@ public class FileRepository : IFileRepository
     {
         try
         {
-            await _context.SaveAsync(fileMetadata);
+            // Salvar o arquivo no DynamoDB
+            //await _context.SaveAsync(fileMetadata);
+
+            // Buscar o bucket
+            var bucket = await _bucketRepository.GetByBucketNameAsync(fileMetadata.BucketName);
+            
+            if (bucket != null)
+            {
+                // Adicionar o arquivo à lista de arquivos do bucket
+                bucket.Files.Add(fileMetadata);
+                
+                // Atualizar o bucket
+                await _bucketRepository.UpdateAsync(bucket);
+                
+                _logger.LogInformation(
+                    "Arquivo {FileName} criado e adicionado ao bucket {BucketName}", 
+                    fileMetadata.FileName, 
+                    fileMetadata.BucketName);
+            }
+            else
+            {
+                _logger.LogWarning(
+                    "Bucket {BucketName} não encontrado ao criar arquivo {FileName}", 
+                    fileMetadata.BucketName, 
+                    fileMetadata.FileName);
+            }
         }
         catch (Exception ex)
         {
@@ -125,8 +155,50 @@ public class FileRepository : IFileRepository
     {
         try
         {
+            // Atualizar data de modificação
             fileMetadata.UpdatedAt = DateTime.UtcNow;
+            
+            // Salvar arquivo atualizado no DynamoDB
             await _context.SaveAsync(fileMetadata);
+
+            // Buscar o bucket
+            var bucket = await _bucketRepository.GetByBucketNameAsync(fileMetadata.BucketName);
+            
+            if (bucket != null)
+            {
+                // Encontrar e atualizar o arquivo na lista do bucket
+                var existingFile = bucket.Files.FirstOrDefault(f => f.FileId == fileMetadata.FileId);
+                
+                if (existingFile != null)
+                {
+                    // Remover versão antiga
+                    bucket.Files.Remove(existingFile);
+                    // Adicionar versão atualizada
+                    bucket.Files.Add(fileMetadata);
+                    
+                    // Atualizar o bucket
+                    await _bucketRepository.UpdateAsync(bucket);
+                    
+                    _logger.LogInformation(
+                        "Arquivo {FileId} atualizado no bucket {BucketName}", 
+                        fileMetadata.FileId, 
+                        fileMetadata.BucketName);
+                }
+                else
+                {
+                    _logger.LogWarning(
+                        "Arquivo {FileId} não encontrado na lista do bucket {BucketName}", 
+                        fileMetadata.FileId, 
+                        fileMetadata.BucketName);
+                }
+            }
+            else
+            {
+                _logger.LogWarning(
+                    "Bucket {BucketName} não encontrado ao atualizar arquivo {FileId}", 
+                    fileMetadata.BucketName, 
+                    fileMetadata.FileId);
+            }
         }
         catch (Exception ex)
         {
@@ -139,12 +211,57 @@ public class FileRepository : IFileRepository
     {
         try
         {
+            // Buscar arquivo
             var file = await GetByIdAsync(fileId);
+            
             if (file != null)
             {
+                // Marcar como deletado (soft delete)
                 file.IsDeleted = true;
                 file.UpdatedAt = DateTime.UtcNow;
+                
+                // Salvar no DynamoDB
                 await _context.SaveAsync(file);
+
+                // Buscar o bucket
+                var bucket = await _bucketRepository.GetByBucketNameAsync(file.BucketName);
+                
+                if (bucket != null)
+                {
+                    // Remover o arquivo da lista do bucket
+                    var fileToRemove = bucket.Files.FirstOrDefault(f => f.FileId == fileId);
+                    
+                    if (fileToRemove != null)
+                    {
+                        bucket.Files.Remove(fileToRemove);
+                        
+                        // Atualizar o bucket
+                        await _bucketRepository.UpdateAsync(bucket);
+                        
+                        _logger.LogInformation(
+                            "Arquivo {FileId} deletado e removido do bucket {BucketName}", 
+                            fileId, 
+                            file.BucketName);
+                    }
+                    else
+                    {
+                        _logger.LogWarning(
+                            "Arquivo {FileId} não encontrado na lista do bucket {BucketName}", 
+                            fileId, 
+                            file.BucketName);
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning(
+                        "Bucket {BucketName} não encontrado ao deletar arquivo {FileId}", 
+                        file.BucketName, 
+                        fileId);
+                }
+            }
+            else
+            {
+                _logger.LogWarning("Arquivo {FileId} não encontrado para deletar", fileId);
             }
         }
         catch (Exception ex)

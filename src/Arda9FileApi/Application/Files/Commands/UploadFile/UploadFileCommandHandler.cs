@@ -71,8 +71,6 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
             // Criar metadados do arquivo
             var fileMetadata = new FileMetadataDto
             {
-                PK = $"FILE#{fileId}",
-                SK = "METADATA",
                 FileId = fileId,
                 FileName = request.File.FileName,
                 BucketName = request.BucketName,
@@ -86,7 +84,6 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
                 IsDeleted = false
             };
 
-            // Salvar metadados no DynamoDB
             await _fileRepository.CreateAsync(fileMetadata);
 
             _logger.LogInformation("Arquivo enviado com sucesso: {FileId} - {FileName}", fileId, request.File.FileName);

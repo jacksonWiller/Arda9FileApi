@@ -49,15 +49,6 @@ public class DeleteBucketHandler : IRequestHandler<DeleteBucketCommand, Result>
                 return Result.NotFound("Bucket não encontrado");
             }
 
-            // Se ForceDelete, deletar todos os objetos primeiro
-            if (request.ForceDelete)
-            {
-                await DeleteAllObjectsAsync(request.BucketName, cancellationToken);
-            }
-
-            // Deletar bucket do S3
-            await _s3Client.DeleteBucketAsync(request.BucketName, cancellationToken);
-
             // Deletar registro do DynamoDB
             await _bucketRepository.DeleteAsync(bucket.Id);
 
@@ -85,29 +76,5 @@ public class DeleteBucketHandler : IRequestHandler<DeleteBucketCommand, Result>
             _logger.LogError(ex, "Erro ao deletar bucket: {BucketName}", request.BucketName);
             return Result.Error();
         }
-    }
-
-    private async Task DeleteAllObjectsAsync(string bucketName, CancellationToken cancellationToken)
-    {
-        var listRequest = new ListObjectsV2Request { BucketName = bucketName };
-        ListObjectsV2Response listResponse;
-
-        do
-        {
-            listResponse = await _s3Client.ListObjectsV2Async(listRequest, cancellationToken);
-
-            if (listResponse.S3Objects.Count > 0)
-            {
-                var deleteRequest = new DeleteObjectsRequest { BucketName = bucketName };
-                deleteRequest.Objects.AddRange(
-                    listResponse.S3Objects.Select(obj => new KeyVersion { Key = obj.Key })
-                );
-
-                await _s3Client.DeleteObjectsAsync(deleteRequest, cancellationToken);
-            }
-
-            listRequest.ContinuationToken = listResponse.NextContinuationToken;
-
-        } while (listResponse.IsTruncated);
     }
 }

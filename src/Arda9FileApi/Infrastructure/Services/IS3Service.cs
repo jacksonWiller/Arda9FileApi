@@ -6,4 +6,7 @@ public interface IS3Service
     Task<Stream?> DownloadFileAsync(string bucketName, string key, CancellationToken cancellationToken = default);
     Task<bool> DeleteFileAsync(string bucketName, string key, CancellationToken cancellationToken = default);
     Task<bool> FileExistsAsync(string bucketName, string key, CancellationToken cancellationToken = default);
+    Task<bool> DeleteAllObjectsAsync(string bucketName, CancellationToken cancellationToken = default);
+    Task<bool> DeleteBucketAsync(string bucketName, CancellationToken cancellationToken = default);
+    Task<bool> BucketExistsAsync(string bucketName, CancellationToken cancellationToken = default);
 }

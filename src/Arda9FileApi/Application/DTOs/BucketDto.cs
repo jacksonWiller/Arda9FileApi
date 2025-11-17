@@ -47,15 +47,8 @@ public class BucketDto
     /// </summary>
     [DynamoDBIgnore]
     public long? Size { get; set; }
-    
-    [DynamoDBIgnore]
-    public int? ObjectCount { get; set; }
-    
-    // GSI para buscar por company
-    //[DynamoDBGlobalSecondaryIndexHashKey("CompanyIndex")]
-    //public string GSI1PK { get; set; } = string.Empty; // COMPANY#<companyId>
-    
-    //// GSI para buscar por bucket name
-    //[DynamoDBGlobalSecondaryIndexHashKey("BucketNameIndex")]
-    //public string GSI2PK { get; set; } = string.Empty; // BUCKET#<bucketName>
+
+    [DynamoDBProperty]
+    public List<FileMetadataDto> Files { get; set; } = new();
+
 }
