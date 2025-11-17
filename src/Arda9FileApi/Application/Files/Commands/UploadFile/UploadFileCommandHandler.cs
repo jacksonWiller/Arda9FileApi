@@ -124,7 +124,7 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
                 ContentType = request.File.ContentType,
                 Size = request.File.Length,
                 Folder = folderPath,
-                CompanyId = request.CompanyId,
+                CompanyId = request.TenantId,
                 SubCompanyId = request.SubCompanyId,
                 UploadedBy = request.UploadedBy,
                 IsPublic = request.IsPublic,

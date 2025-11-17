@@ -72,7 +72,7 @@ public class CreateFolderCommandHandler : IRequestHandler<CreateFolderCommand, R
                 BucketId = request.BucketId,
                 Path = fullPath,
                 ParentFolderId = request.ParentFolderId,
-                CompanyId = request.CompanyId,
+                CompanyId = request.TenantId,
                 CreatedBy = request.CreatedBy,
                 IsPublic = request.IsPublic,
                 CreatedAt = DateTime.UtcNow,
@@ -96,13 +96,8 @@ public class CreateFolderCommandHandler : IRequestHandler<CreateFolderCommand, R
         }
     }
 
-    private async Task<string> BuildFullPath(string? requestPath, Guid? parentFolderId)
+    private async Task<string> BuildFullPath(Guid? parentFolderId)
     {
-        if (!string.IsNullOrEmpty(requestPath))
-        {
-            return requestPath.TrimEnd('/');
-        }
-
         if (parentFolderId.HasValue)
         {
             var parentFolder = await _repository.GetByIdAsync(parentFolderId.Value);

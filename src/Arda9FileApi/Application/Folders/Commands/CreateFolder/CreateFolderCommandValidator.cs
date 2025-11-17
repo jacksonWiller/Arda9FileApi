@@ -18,13 +18,9 @@ public class CreateFolderCommandValidator : AbstractValidator<CreateFolderComman
             .NotEmpty()
             .WithMessage("BucketId is required");
 
-        RuleFor(x => x.CompanyId)
-            .NotEmpty()
+            RuleFor(x => x.TenantId)
+        .NotEmpty()
             .WithMessage("CompanyId is required");
 
-        RuleFor(x => x.Path)
-            .MaximumLength(1000)
-            .WithMessage("Path must not exceed 1000 characters")
-            .When(x => !string.IsNullOrEmpty(x.Path));
     }
 }

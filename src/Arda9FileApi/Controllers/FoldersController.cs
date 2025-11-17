@@ -1,5 +1,10 @@
 using Arda9FileApi.Api.Extensions;
 using Arda9FileApi.Application.Folders.Commands.CreateFolder;
+using Arda9FileApi.Application.Folders.Commands.UpdateFolder;
+using Arda9FileApi.Application.Folders.Commands.DeleteFolder;
+using Arda9FileApi.Application.Folders.Queries.GetFolderById;
+using Arda9FileApi.Application.Folders.Queries.GetFoldersByBucket;
+using Arda9FileApi.Application.Folders.Queries.GetFoldersByParent;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -30,6 +35,76 @@ public class FoldersController : ControllerBase
     public async Task<IActionResult> CreateFolder(Guid tenantId, [FromBody] CreateFolderCommand command)
     {
         command.TenantId = tenantId;
+        var result = await _mediator.Send(command);
+        return result.ToActionResult();
+    }
+
+    /// <summary>
+    /// Obtém uma pasta por ID
+    /// </summary>
+    [HttpGet("{tenantId}/{folderId}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetFolderById(Guid tenantId, Guid folderId)
+    {
+        var query = new GetFolderByIdQuery { TenantId = tenantId, FolderId = folderId };
+        var result = await _mediator.Send(query);
+        return result.ToActionResult();
+    }
+
+    /// <summary>
+    /// Obtém todas as pastas de um bucket
+    /// </summary>
+    [HttpGet("{tenantId}/bucket/{bucketId}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetFoldersByBucket(Guid tenantId, Guid bucketId)
+    {
+        var query = new GetFoldersByBucketQuery { TenantId = tenantId, BucketId = bucketId };
+        var result = await _mediator.Send(query);
+        return result.ToActionResult();
+    }
+
+    /// <summary>
+    /// Obtém as subpastas de uma pasta pai
+    /// </summary>
+    [HttpGet("{tenantId}/parent/{parentFolderId}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetFoldersByParent(Guid tenantId, Guid parentFolderId)
+    {
+        var query = new GetFoldersByParentQuery { TenantId = tenantId, ParentFolderId = parentFolderId };
+        var result = await _mediator.Send(query);
+        return result.ToActionResult();
+    }
+
+    /// <summary>
+    /// Atualiza uma pasta
+    /// </summary>
+    [HttpPut("{tenantId}/{folderId}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> UpdateFolder(Guid tenantId, Guid folderId, [FromBody] UpdateFolderCommand command)
+    {
+        command.TenantId = tenantId;
+        command.FolderId = folderId;
+        var result = await _mediator.Send(command);
+        return result.ToActionResult();
+    }
+
+    /// <summary>
+    /// Exclui uma pasta (soft delete)
+    /// </summary>
+    [HttpDelete("{tenantId}/{folderId}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> DeleteFolder(Guid tenantId, Guid folderId)
+    {
+        var command = new DeleteFolderCommand { TenantId = tenantId, FolderId = folderId };
         var result = await _mediator.Send(command);
         return result.ToActionResult();
     }
