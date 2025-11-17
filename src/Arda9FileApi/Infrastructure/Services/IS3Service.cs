@@ -12,5 +12,7 @@ public interface IS3Service
     Task<string> GetPublicUrlAsync(string bucketName, string key);
     Task<bool> SetObjectAclAsync(string bucketName, string key, bool isPublic, CancellationToken cancellationToken = default);
     string BuildS3Key(string? folder, Guid fileId, string fileName);
+
+    string BuildS3Key(string? folder, string fileName);
     string SanitizeFileName(string fileName);
 }

@@ -29,9 +29,15 @@ public class S3Service : IS3Service
                 BucketName = bucketName,
                 Key = key,
                 InputStream = fileStream,
-                ContentType = contentType,
-                CannedACL = isPublic ? S3CannedACL.PublicRead : S3CannedACL.Private
+                ContentType = contentType
+                // Removido: CannedACL - não usar ACLs se o bucket não permite
             };
+
+            // Se o arquivo precisa ser público, adicionar metadados
+            if (isPublic)
+            {
+                request.Metadata.Add("x-amz-meta-public", "true");
+            }
 
             var response = await _s3Client.PutObjectAsync(request, cancellationToken);
             
@@ -226,6 +232,17 @@ public class S3Service : IS3Service
 
     public string BuildS3Key(string? folder, Guid fileId, string fileName)
     {
-        throw new NotImplementedException();
+        var sanitizedFileName = SanitizeFileName(fileName);
+        var pathParts = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(folder))
+        {
+            pathParts.Add(folder.Trim('/'));
+        }
+
+        // Adiciona o fileId para garantir unicidade
+        pathParts.Add($"{fileId}_{sanitizedFileName}");
+
+        return string.Join("/", pathParts);
     }
 }

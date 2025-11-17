@@ -5,8 +5,8 @@ namespace Arda9FileApi.Application.DTOs;
 [DynamoDBTable("arda9-file-v1")]
 public class FolderDto
 {
-    [DynamoDBProperty("FolderId")]
-    public Guid FolderId { get; set; }
+    [DynamoDBHashKey]
+    public Guid Id { get; set; }
 
     [DynamoDBProperty("FolderName")]
     public string FolderName { get; set; } = string.Empty;

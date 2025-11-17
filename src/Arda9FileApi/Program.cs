@@ -128,7 +128,8 @@ builder.Services
 builder.Services
     .AddScoped<IUserRepository, UserRepository>()
     .AddScoped<IBucketRepository, BucketRepository>()
-    .AddScoped<IFileRepository, FileRepository>();
+    .AddScoped<IFileRepository, FileRepository>()
+    .AddScoped<IFolderRepository, FolderRepository>();
 
 // Registrar Services
 builder.Services

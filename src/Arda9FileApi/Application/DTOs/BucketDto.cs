@@ -51,4 +51,6 @@ public class BucketDto
     [DynamoDBProperty]
     public List<FileMetadataDto> Files { get; set; } = new();
 
+    [DynamoDBProperty]
+    public List<FolderDto> Folders { get; set; } = new();
 }
