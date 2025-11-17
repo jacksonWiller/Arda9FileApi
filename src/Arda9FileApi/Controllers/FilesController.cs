@@ -1,64 +1,53 @@
-//using System.Net.Mime;
-//using MediatR;
-//using Microsoft.AspNetCore.Mvc;
-//using Arda9FileApi.Application.Files.Commands;
-//using Arda9FileApi.Application.Files.Queries;
-//using Arda9UserApi.Api.Extensions;
+using System.Net.Mime;
+using MediatR;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Arda9FileApi.Application.Files.Commands.UploadFile;
 
-//namespace Arda9FileApi.Controllers;
+namespace Arda9FileApi.Controllers;
 
-//[ApiController]
-//[Route("api/[controller]")]
-//public class FilesController : ControllerBase
-//{
-//    private readonly IMediator _mediator;
+[ApiController]
+[Route("api/[controller]")]
+//[Authorize]
+public class FilesController : ControllerBase
+{
+    private readonly IMediator _mediator;
+    private readonly ILogger<FilesController> _logger;
 
-//    public FilesController(IMediator mediator)
-//    {
-//        _mediator = mediator;
-//    }
+    public FilesController(IMediator mediator, ILogger<FilesController> logger)
+    {
+        _mediator = mediator;
+        _logger = logger;
+    }
 
-//    [HttpPost]
-//    [Consumes(MediaTypeNames.Multipart.FormData)]
-//    [Produces(MediaTypeNames.Application.Json)]
-//    [ProducesResponseType(typeof(UploadFileResponse), StatusCodes.Status200OK)]
-//    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-//    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-//    public async Task<IActionResult> UploadFileAsync([FromForm] UploadFileCommand command)
-//    {
-//        var result = await _mediator.Send(command);
-//        return result.ToActionResult();
-//    }
+    [HttpPost]
+    [Consumes(MediaTypeNames.Multipart.FormData)]
+    [Produces(MediaTypeNames.Application.Json)]
+    [ProducesResponseType(typeof(UploadFileResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> UploadFileAsync([FromForm] UploadFileCommand command)
+    {
+        try
+        {
+            var result = await _mediator.Send(command);
 
-//    [HttpGet]
-//    [ProducesResponseType(typeof(IEnumerable<S3ObjectDto>), StatusCodes.Status200OK)]
-//    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-//    public async Task<IActionResult> GetAllFilesAsync([FromQuery] GetAllFilesQuery query)
-//    {
-//        var result = await _mediator.Send(query);
-//        return result.ToActionResult();
-//    }
+            if (result.IsSuccess)
+            {
+                return Ok(result.Value);
+            }
 
-//    [HttpGet("{key}")]
-//    [ProducesResponseType(typeof(GetFileByKeyResponse), StatusCodes.Status200OK)]
-//    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-//    [ProducesResponseType(StatusCodes.Status404NotFound)]
-//    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-//    public async Task<IActionResult> GetFileByKeyAsync(string key, [FromQuery] string bucketName)
-//    {
-//        var query = new GetFileByKeyQuery { Key = key, BucketName = bucketName };
-//        var result = await _mediator.Send(query);
-//        return result.ToActionResult();
-//    }
-
-//    [HttpDelete("{key}")]
-//    [ProducesResponseType(StatusCodes.Status204NoContent)]
-//    [ProducesResponseType(StatusCodes.Status404NotFound)]
-//    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-//    public async Task<IActionResult> DeleteFileAsync(string key, [FromQuery] string bucketName)
-//    {
-//        var command = new DeleteFileCommand { Key = key, BucketName = bucketName };
-//        var result = await _mediator.Send(command);
-//        return result.ToActionResult();
-//    }
-//}
+            return result.Status switch
+            {
+                Ardalis.Result.ResultStatus.NotFound => NotFound(result.Errors),
+                Ardalis.Result.ResultStatus.Invalid => BadRequest(result.ValidationErrors),
+                _ => StatusCode(StatusCodes.Status500InternalServerError, result.Errors)
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao fazer upload do arquivo");
+            return StatusCode(StatusCodes.Status500InternalServerError, "Erro interno ao processar a requisição");
+        }
+    }
+}

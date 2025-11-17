@@ -8,6 +8,7 @@ using Arda9FileApi.Application.Services;
 using Arda9FileApi.Configuration;
 using Arda9FileApi.Core.Behaviors;
 using Arda9FileApi.Infrastructure.Repositories;
+using Arda9FileApi.Infrastructure.Services;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -80,7 +81,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new() { 
-        Title = "Arda9 User API", 
+        Title = "Arda9 File API", 
         Version = "v1",
         Description = "API para gerenciamento de usuários, autenticação e buckets usando AWS Lambda, DynamoDB, Cognito e S3"
     });
@@ -126,11 +127,13 @@ builder.Services
 // Registrar Repositories
 builder.Services
     .AddScoped<IUserRepository, UserRepository>()
-    .AddScoped<IBucketRepository, BucketRepository>();
+    .AddScoped<IBucketRepository, BucketRepository>()
+    .AddScoped<IFileRepository, FileRepository>();
 
 // Registrar Services
 builder.Services
-    .AddScoped<IAuthService, AuthService>();
+    .AddScoped<IAuthService, AuthService>()
+    .AddScoped<IS3Service, S3Service>();
 
 // Add AWS Lambda support
 builder.Services.AddAWSLambdaHosting(LambdaEventSource.HttpApi);
@@ -140,7 +143,7 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI(c =>
 {
-    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Arda9 User API v1");
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Arda9 File API v1");
     c.RoutePrefix = string.Empty; // Define o Swagger como página inicial
 });
 
