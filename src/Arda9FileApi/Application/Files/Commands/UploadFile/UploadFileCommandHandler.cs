@@ -51,8 +51,8 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
             // Gerar ID único para o arquivo
             var fileId = Guid.NewGuid();
             
-            // Construir S3 Key
-            var s3Key = BuildS3Key(request.Folder, request.CompanyId, request.SubCompanyId, fileId, request.File.FileName);
+            // Construir S3 Key usando o serviço
+            var s3Key = _s3Service.BuildS3Key(request.Folder, fileId, request.File.FileName);
 
             // Fazer upload para S3
             var uploadResult = await _s3Service.UploadFileAsync(
@@ -60,12 +60,21 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
                 s3Key,
                 request.File.OpenReadStream(),
                 request.File.ContentType,
+                request.IsPublic,
                 cancellationToken);
 
             if (!uploadResult)
             {
                 _logger.LogError("Falha ao fazer upload do arquivo para S3: {S3Key}", s3Key);
                 return Result.Error();
+            }
+
+            // Obter URL pública se o arquivo for público
+            string? publicUrl = null;
+            if (request.IsPublic)
+            {
+                publicUrl = await _s3Service.GetPublicUrlAsync(request.BucketName, s3Key);
+                _logger.LogInformation("URL pública gerada para arquivo: {PublicUrl}", publicUrl);
             }
 
             // Criar metadados do arquivo
@@ -77,16 +86,20 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
                 S3Key = s3Key,
                 ContentType = request.File.ContentType,
                 Size = request.File.Length,
-                CompanyId = request.CompanyId,
-                SubCompanyId = request.SubCompanyId,
                 UploadedBy = request.UploadedBy,
+                IsPublic = request.IsPublic,
+                PublicUrl = publicUrl,
                 CreatedAt = DateTime.UtcNow,
                 IsDeleted = false
             };
 
             await _fileRepository.CreateAsync(fileMetadata);
 
-            _logger.LogInformation("Arquivo enviado com sucesso: {FileId} - {FileName}", fileId, request.File.FileName);
+            _logger.LogInformation(
+                "Arquivo enviado com sucesso: {FileId} - {FileName} (Público: {IsPublic})", 
+                fileId, 
+                request.File.FileName, 
+                request.IsPublic);
 
             return Result.Success(new UploadFileResponse
             {
@@ -99,36 +112,5 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
             _logger.LogError(ex, "Erro ao processar upload do arquivo: {FileName}", request.File?.FileName);
             return Result.Error();
         }
-    }
-
-    private static string BuildS3Key(string? folder, Guid companyId, Guid? subCompanyId, Guid fileId, string fileName)
-    {
-        var sanitizedFileName = SanitizeFileName(fileName);
-        var timestamp = DateTime.UtcNow.ToString("yyyyMMdd");
-        
-        var pathParts = new List<string>();
-
-        if (!string.IsNullOrWhiteSpace(folder))
-        {
-            pathParts.Add(folder.Trim('/'));
-        }
-
-        pathParts.Add($"company-{companyId}");
-
-        if (subCompanyId.HasValue)
-        {
-            pathParts.Add($"subcompany-{subCompanyId.Value}");
-        }
-
-        pathParts.Add(timestamp);
-        pathParts.Add($"{fileId}_{sanitizedFileName}");
-
-        return string.Join("/", pathParts);
-    }
-
-    private static string SanitizeFileName(string fileName)
-    {
-        var invalidChars = Path.GetInvalidFileNameChars();
-        return string.Join("_", fileName.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries));
     }
 }

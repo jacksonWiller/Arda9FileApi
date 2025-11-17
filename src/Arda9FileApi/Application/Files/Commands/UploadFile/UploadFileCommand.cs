@@ -12,4 +12,5 @@ public class UploadFileCommand : IRequest<Result<UploadFileResponse>>
     public Guid? SubCompanyId { get; set; }
     public string? Folder { get; set; }
     public Guid? UploadedBy { get; set; }
+    public bool IsPublic { get; set; } = false;
 }

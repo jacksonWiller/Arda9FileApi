@@ -29,6 +29,9 @@ public class FileMetadataDto
     [DynamoDBProperty("Size")]
     public long Size { get; set; }
 
+    [DynamoDBProperty("Folder")]
+    public string? Folder { get; set; }
+
     [DynamoDBProperty("CompanyId")]
     public Guid CompanyId { get; set; }
 
@@ -37,6 +40,12 @@ public class FileMetadataDto
 
     [DynamoDBProperty("UploadedBy")]
     public Guid? UploadedBy { get; set; }
+
+    [DynamoDBProperty("IsPublic")]
+    public bool IsPublic { get; set; }
+
+    [DynamoDBProperty("PublicUrl")]
+    public string? PublicUrl { get; set; }
 
     [DynamoDBProperty("CreatedAt")]
     public DateTime CreatedAt { get; set; }

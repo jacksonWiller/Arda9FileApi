@@ -14,7 +14,13 @@ public class S3Service : IS3Service
         _logger = logger;
     }
 
-    public async Task<bool> UploadFileAsync(string bucketName, string key, Stream fileStream, string contentType, CancellationToken cancellationToken = default)
+    public async Task<bool> UploadFileAsync(
+        string bucketName, 
+        string key, 
+        Stream fileStream, 
+        string contentType, 
+        bool isPublic = false,
+        CancellationToken cancellationToken = default)
     {
         try
         {
@@ -23,16 +29,22 @@ public class S3Service : IS3Service
                 BucketName = bucketName,
                 Key = key,
                 InputStream = fileStream,
-                ContentType = contentType
+                ContentType = contentType,
+                CannedACL = isPublic ? S3CannedACL.PublicRead : S3CannedACL.Private
             };
 
             var response = await _s3Client.PutObjectAsync(request, cancellationToken);
+            
+            _logger.LogInformation(
+                "Arquivo {Key} enviado para o bucket {BucketName} com visibilidade {Visibility}",
+                key, bucketName, isPublic ? "pública" : "privada");
+            
             return response.HttpStatusCode == System.Net.HttpStatusCode.OK;
         }
-        catch (AmazonS3Exception ex)
+        catch (Exception ex)
         {
             _logger.LogError(ex, "Erro ao fazer upload do arquivo {Key} para o bucket {BucketName}", key, bucketName);
-            throw;
+            return false;
         }
     }
 
@@ -40,21 +52,15 @@ public class S3Service : IS3Service
     {
         try
         {
-            var request = new GetObjectRequest
-            {
-                BucketName = bucketName,
-                Key = key
-            };
-
-            var response = await _s3Client.GetObjectAsync(request, cancellationToken);
+            var response = await _s3Client.GetObjectAsync(bucketName, key, cancellationToken);
             return response.ResponseStream;
         }
-        catch (AmazonS3Exception ex) when (ex.ErrorCode == "NoSuchKey")
+        catch (AmazonS3Exception ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
             _logger.LogWarning("Arquivo {Key} não encontrado no bucket {BucketName}", key, bucketName);
             return null;
         }
-        catch (AmazonS3Exception ex)
+        catch (Exception ex)
         {
             _logger.LogError(ex, "Erro ao fazer download do arquivo {Key} do bucket {BucketName}", key, bucketName);
             throw;
@@ -65,19 +71,14 @@ public class S3Service : IS3Service
     {
         try
         {
-            var request = new DeleteObjectRequest
-            {
-                BucketName = bucketName,
-                Key = key
-            };
-
-            var response = await _s3Client.DeleteObjectAsync(request, cancellationToken);
-            return response.HttpStatusCode == System.Net.HttpStatusCode.NoContent;
+            await _s3Client.DeleteObjectAsync(bucketName, key, cancellationToken);
+            _logger.LogInformation("Arquivo {Key} deletado do bucket {BucketName}", key, bucketName);
+            return true;
         }
-        catch (AmazonS3Exception ex)
+        catch (Exception ex)
         {
             _logger.LogError(ex, "Erro ao deletar arquivo {Key} do bucket {BucketName}", key, bucketName);
-            throw;
+            return false;
         }
     }
 
@@ -85,20 +86,14 @@ public class S3Service : IS3Service
     {
         try
         {
-            var request = new GetObjectMetadataRequest
-            {
-                BucketName = bucketName,
-                Key = key
-            };
-
-            await _s3Client.GetObjectMetadataAsync(request, cancellationToken);
+            await _s3Client.GetObjectMetadataAsync(bucketName, key, cancellationToken);
             return true;
         }
-        catch (AmazonS3Exception ex) when (ex.ErrorCode == "NotFound")
+        catch (AmazonS3Exception ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
             return false;
         }
-        catch (AmazonS3Exception ex)
+        catch (Exception ex)
         {
             _logger.LogError(ex, "Erro ao verificar existência do arquivo {Key} no bucket {BucketName}", key, bucketName);
             throw;
@@ -120,24 +115,21 @@ public class S3Service : IS3Service
                 {
                     var deleteRequest = new DeleteObjectsRequest { BucketName = bucketName };
                     deleteRequest.Objects.AddRange(
-                        listResponse.S3Objects.Select(obj => new KeyVersion { Key = obj.Key })
-                    );
+                        listResponse.S3Objects.Select(obj => new KeyVersion { Key = obj.Key }));
 
                     await _s3Client.DeleteObjectsAsync(deleteRequest, cancellationToken);
-                    
-                    _logger.LogInformation("Deletados {Count} objetos do bucket {BucketName}", listResponse.S3Objects.Count, bucketName);
                 }
 
                 listRequest.ContinuationToken = listResponse.NextContinuationToken;
-
             } while (listResponse.IsTruncated);
 
+            _logger.LogInformation("Todos os objetos deletados do bucket {BucketName}", bucketName);
             return true;
         }
-        catch (AmazonS3Exception ex)
+        catch (Exception ex)
         {
-            _logger.LogError(ex, "Erro ao deletar objetos do bucket {BucketName}", bucketName);
-            throw;
+            _logger.LogError(ex, "Erro ao deletar todos os objetos do bucket {BucketName}", bucketName);
+            return false;
         }
     }
 
@@ -145,30 +137,14 @@ public class S3Service : IS3Service
     {
         try
         {
-            var request = new DeleteBucketRequest
-            {
-                BucketName = bucketName
-            };
-
-            var response = await _s3Client.DeleteBucketAsync(request, cancellationToken);
-            _logger.LogInformation("Bucket {BucketName} deletado com sucesso do S3", bucketName);
-            
-            return response.HttpStatusCode == System.Net.HttpStatusCode.NoContent;
+            await _s3Client.DeleteBucketAsync(bucketName, cancellationToken);
+            _logger.LogInformation("Bucket {BucketName} deletado com sucesso", bucketName);
+            return true;
         }
-        catch (AmazonS3Exception ex) when (ex.ErrorCode == "NoSuchBucket")
-        {
-            _logger.LogWarning("Bucket {BucketName} não existe no S3", bucketName);
-            return true; // Considera sucesso se o bucket já não existe
-        }
-        catch (AmazonS3Exception ex) when (ex.ErrorCode == "BucketNotEmpty")
-        {
-            _logger.LogWarning("Tentativa de deletar bucket não vazio: {BucketName}", bucketName);
-            return false;
-        }
-        catch (AmazonS3Exception ex)
+        catch (Exception ex)
         {
             _logger.LogError(ex, "Erro ao deletar bucket {BucketName}", bucketName);
-            throw;
+            return false;
         }
     }
 
@@ -179,14 +155,77 @@ public class S3Service : IS3Service
             await _s3Client.GetBucketLocationAsync(bucketName, cancellationToken);
             return true;
         }
-        catch (AmazonS3Exception ex) when (ex.ErrorCode == "NoSuchBucket")
+        catch (AmazonS3Exception ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
             return false;
         }
-        catch (AmazonS3Exception ex)
+        catch (Exception ex)
         {
             _logger.LogError(ex, "Erro ao verificar existência do bucket {BucketName}", bucketName);
             throw;
         }
+    }
+
+    public Task<string> GetPublicUrlAsync(string bucketName, string key)
+    {
+        var region = _s3Client.Config.RegionEndpoint.SystemName;
+        var url = $"https://{bucketName}.s3.{region}.amazonaws.com/{key}";
+        return Task.FromResult(url);
+    }
+
+    public async Task<bool> SetObjectAclAsync(
+        string bucketName, 
+        string key, 
+        bool isPublic, 
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var request = new PutACLRequest
+            {
+                BucketName = bucketName,
+                Key = key,
+                CannedACL = isPublic ? S3CannedACL.PublicRead : S3CannedACL.Private
+            };
+
+            await _s3Client.PutACLAsync(request, cancellationToken);
+            
+            _logger.LogInformation(
+                "ACL do arquivo {Key} no bucket {BucketName} alterado para {Visibility}",
+                key, bucketName, isPublic ? "público" : "privado");
+            
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao alterar ACL do arquivo {Key} no bucket {BucketName}", key, bucketName);
+            return false;
+        }
+    }
+
+    public string BuildS3Key(string? folder, string fileName)
+    {
+        var sanitizedFileName = SanitizeFileName(fileName);
+        var pathParts = new List<string>();
+
+        if (!string.IsNullOrWhiteSpace(folder))
+        {
+            pathParts.Add(folder.Trim('/'));
+        }
+
+        pathParts.Add($"{sanitizedFileName}");
+
+        return string.Join("/", pathParts);
+    }
+
+    public string SanitizeFileName(string fileName)
+    {
+        var invalidChars = Path.GetInvalidFileNameChars();
+        return string.Join("_", fileName.Split(invalidChars, StringSplitOptions.RemoveEmptyEntries));
+    }
+
+    public string BuildS3Key(string? folder, Guid fileId, string fileName)
+    {
+        throw new NotImplementedException();
     }
 }
