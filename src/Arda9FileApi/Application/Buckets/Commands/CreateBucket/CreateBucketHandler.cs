@@ -66,9 +66,7 @@ public class CreateBucketHandler : IRequestHandler<CreateBucketCommand, Result<C
                 Status = "Active",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
-                CreatedBy = request.CreatedBy,
-                GSI1PK = $"COMPANY#{request.CompanyId}",
-                GSI2PK = $"BUCKET#{request.BucketName}"
+                CreatedBy = request.CreatedBy
             };
 
              await _bucketRepository.CreateAsync(bucketDto);

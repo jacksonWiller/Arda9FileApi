@@ -52,10 +52,10 @@ public class BucketDto
     public int? ObjectCount { get; set; }
     
     // GSI para buscar por company
-    [DynamoDBGlobalSecondaryIndexHashKey("CompanyIndex")]
-    public string GSI1PK { get; set; } = string.Empty; // COMPANY#<companyId>
+    //[DynamoDBGlobalSecondaryIndexHashKey("CompanyIndex")]
+    //public string GSI1PK { get; set; } = string.Empty; // COMPANY#<companyId>
     
-    // GSI para buscar por bucket name
-    [DynamoDBGlobalSecondaryIndexHashKey("BucketNameIndex")]
-    public string GSI2PK { get; set; } = string.Empty; // BUCKET#<bucketName>
+    //// GSI para buscar por bucket name
+    //[DynamoDBGlobalSecondaryIndexHashKey("BucketNameIndex")]
+    //public string GSI2PK { get; set; } = string.Empty; // BUCKET#<bucketName>
 }
