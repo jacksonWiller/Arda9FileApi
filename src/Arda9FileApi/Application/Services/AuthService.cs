@@ -2,48 +2,39 @@ using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
 using Arda9FileApi.Application.Auth.GetUserInfo;
 using Arda9FileApi.Configuration;
+using Ardalis.Result;
 using Microsoft.Extensions.Options;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
 namespace Arda9FileApi.Application.Services;
 
-public interface IAuthService
-{
-    string ComputeSecretHash(string username);
-    Task<SignUpResponse> RegisterUserAsync(string email, string password, string name, string? phoneNumber);
-    Task ConfirmSignUpAsync(string email, string code);
-    Task ResendConfirmationCodeAsync(string email);
-    Task<InitiateAuthResponse> LoginAsync(string email, string password);
-    Task<InitiateAuthResponse> RefreshTokenAsync(string refreshToken);
-    Task SendForgotPasswordCodeAsync(string email);
-    Task ConfirmForgotPasswordAsync(string email, string code, string newPassword);
-    Task ChangePasswordAsync(string accessToken, string oldPassword, string newPassword);
-    Task GlobalSignOutAsync(string accessToken);
-    Task<GetUserResponse> GetUserAsync(string accessToken);
-    Task<UserInfoResponse> GetUserInfoAsync(string accessToken);
-}
-
 public class AuthService : IAuthService
 {
-    private readonly IAmazonCognitoIdentityProvider cognitoClient;
-    private readonly AwsCognitoConfig cognitoConfig;
-    private readonly ILogger<AuthService> logger;
+    private readonly IAmazonCognitoIdentityProvider _cognitoClient;
+    private readonly AwsCognitoConfig _cognitoConfig;
+    private readonly ILogger<AuthService> _logger;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
     public AuthService(
         IAmazonCognitoIdentityProvider cognitoClient,
         IOptions<AwsCognitoConfig> cognitoConfig,
-        ILogger<AuthService> logger)
+        ILogger<AuthService> logger,
+        IHttpContextAccessor httpContextAccessor)
     {
-        this.cognitoClient = cognitoClient;
-        this.cognitoConfig = cognitoConfig.Value;
-        this.logger = logger;
+        _cognitoClient = cognitoClient;
+        _cognitoConfig = cognitoConfig.Value;
+        _logger = logger;
+        _httpContextAccessor = httpContextAccessor;
     }
+
+    #region Cognito Authentication Methods
 
     public string ComputeSecretHash(string username)
     {
-        var message = username + cognitoConfig.ClientId;
-        var key = Encoding.UTF8.GetBytes(cognitoConfig.ClientSecret);
+        var message = username + _cognitoConfig.ClientId;
+        var key = Encoding.UTF8.GetBytes(_cognitoConfig.ClientSecret);
         var messageBytes = Encoding.UTF8.GetBytes(message);
 
         using var hmac = new HMACSHA256(key);
@@ -57,7 +48,7 @@ public class AuthService : IAuthService
 
         var signUpRequest = new SignUpRequest
         {
-            ClientId = cognitoConfig.ClientId,
+            ClientId = _cognitoConfig.ClientId,
             SecretHash = secretHash,
             Username = email,
             Password = password,
@@ -77,8 +68,8 @@ public class AuthService : IAuthService
             });
         }
 
-        var response = await cognitoClient.SignUpAsync(signUpRequest);
-        logger.LogInformation("User {Email} registered successfully with UserSub {UserSub}", email, response.UserSub);
+        var response = await _cognitoClient.SignUpAsync(signUpRequest);
+        _logger.LogInformation("User {Email} registered successfully with UserSub {UserSub}", email, response.UserSub);
         
         return response;
     }
@@ -89,14 +80,14 @@ public class AuthService : IAuthService
 
         var confirmRequest = new ConfirmSignUpRequest
         {
-            ClientId = cognitoConfig.ClientId,
+            ClientId = _cognitoConfig.ClientId,
             SecretHash = secretHash,
             Username = email,
             ConfirmationCode = code
         };
 
-        await cognitoClient.ConfirmSignUpAsync(confirmRequest);
-        logger.LogInformation("User {Email} confirmed successfully", email);
+        await _cognitoClient.ConfirmSignUpAsync(confirmRequest);
+        _logger.LogInformation("User {Email} confirmed successfully", email);
     }
 
     public async Task ResendConfirmationCodeAsync(string email)
@@ -105,13 +96,13 @@ public class AuthService : IAuthService
 
         var resendRequest = new ResendConfirmationCodeRequest
         {
-            ClientId = cognitoConfig.ClientId,
+            ClientId = _cognitoConfig.ClientId,
             SecretHash = secretHash,
             Username = email
         };
 
-        await cognitoClient.ResendConfirmationCodeAsync(resendRequest);
-        logger.LogInformation("Confirmation code resent to {Email}", email);
+        await _cognitoClient.ResendConfirmationCodeAsync(resendRequest);
+        _logger.LogInformation("Confirmation code resent to {Email}", email);
     }
 
     public async Task<InitiateAuthResponse> LoginAsync(string email, string password)
@@ -120,7 +111,7 @@ public class AuthService : IAuthService
 
         var authRequest = new InitiateAuthRequest
         {
-            ClientId = cognitoConfig.ClientId,
+            ClientId = _cognitoConfig.ClientId,
             AuthFlow = AuthFlowType.USER_PASSWORD_AUTH,
             AuthParameters = new Dictionary<string, string>
             {
@@ -130,8 +121,8 @@ public class AuthService : IAuthService
             }
         };
 
-        var response = await cognitoClient.InitiateAuthAsync(authRequest);
-        logger.LogInformation("User {Email} logged in successfully", email);
+        var response = await _cognitoClient.InitiateAuthAsync(authRequest);
+        _logger.LogInformation("User {Email} logged in successfully", email);
         
         return response;
     }
@@ -142,7 +133,7 @@ public class AuthService : IAuthService
 
         var refreshRequest = new InitiateAuthRequest
         {
-            ClientId = cognitoConfig.ClientId,
+            ClientId = _cognitoConfig.ClientId,
             AuthFlow = AuthFlowType.REFRESH_TOKEN_AUTH,
             AuthParameters = new Dictionary<string, string>
             {
@@ -151,8 +142,8 @@ public class AuthService : IAuthService
             }
         };
 
-        var response = await cognitoClient.InitiateAuthAsync(refreshRequest);
-        logger.LogInformation("Token refreshed successfully");
+        var response = await _cognitoClient.InitiateAuthAsync(refreshRequest);
+        _logger.LogInformation("Token refreshed successfully");
         
         return response;
     }
@@ -163,13 +154,13 @@ public class AuthService : IAuthService
 
         var forgotRequest = new ForgotPasswordRequest
         {
-            ClientId = cognitoConfig.ClientId,
+            ClientId = _cognitoConfig.ClientId,
             SecretHash = secretHash,
             Username = email
         };
 
-        await cognitoClient.ForgotPasswordAsync(forgotRequest);
-        logger.LogInformation("Password reset code sent to {Email}", email);
+        await _cognitoClient.ForgotPasswordAsync(forgotRequest);
+        _logger.LogInformation("Password reset code sent to {Email}", email);
     }
 
     public async Task ConfirmForgotPasswordAsync(string email, string code, string newPassword)
@@ -178,15 +169,15 @@ public class AuthService : IAuthService
 
         var confirmRequest = new ConfirmForgotPasswordRequest
         {
-            ClientId = cognitoConfig.ClientId,
+            ClientId = _cognitoConfig.ClientId,
             SecretHash = secretHash,
             Username = email,
             ConfirmationCode = code,
             Password = newPassword
         };
 
-        await cognitoClient.ConfirmForgotPasswordAsync(confirmRequest);
-        logger.LogInformation("Password reset successfully for {Email}", email);
+        await _cognitoClient.ConfirmForgotPasswordAsync(confirmRequest);
+        _logger.LogInformation("Password reset successfully for {Email}", email);
     }
 
     public async Task ChangePasswordAsync(string accessToken, string oldPassword, string newPassword)
@@ -198,8 +189,8 @@ public class AuthService : IAuthService
             ProposedPassword = newPassword
         };
 
-        await cognitoClient.ChangePasswordAsync(changeRequest);
-        logger.LogInformation("Password changed successfully");
+        await _cognitoClient.ChangePasswordAsync(changeRequest);
+        _logger.LogInformation("Password changed successfully");
     }
 
     public async Task GlobalSignOutAsync(string accessToken)
@@ -209,8 +200,8 @@ public class AuthService : IAuthService
             AccessToken = accessToken
         };
 
-        await cognitoClient.GlobalSignOutAsync(signOutRequest);
-        logger.LogInformation("User logged out successfully");
+        await _cognitoClient.GlobalSignOutAsync(signOutRequest);
+        _logger.LogInformation("User logged out successfully");
     }
 
     public async Task<GetUserResponse> GetUserAsync(string accessToken)
@@ -220,7 +211,7 @@ public class AuthService : IAuthService
             AccessToken = accessToken
         };
 
-        return await cognitoClient.GetUserAsync(getUserRequest);
+        return await _cognitoClient.GetUserAsync(getUserRequest);
     }
 
     public async Task<UserInfoResponse> GetUserInfoAsync(string accessToken)
@@ -230,7 +221,7 @@ public class AuthService : IAuthService
             AccessToken = accessToken
         };
 
-        var response = await cognitoClient.GetUserAsync(getUserRequest);
+        var response = await _cognitoClient.GetUserAsync(getUserRequest);
 
         var userInfo = new UserInfoResponse
         {
@@ -244,4 +235,91 @@ public class AuthService : IAuthService
 
         return userInfo;
     }
+
+    #endregion
+
+    #region User Context Methods
+
+    public bool IsAuthenticated()
+    {
+        var userClaims = _httpContextAccessor.HttpContext?.User;
+        return userClaims?.Identity?.IsAuthenticated == true;
+    }
+
+    public Result<Guid> GetCurrentUserId()
+    {
+        var userClaims = _httpContextAccessor.HttpContext?.User;
+        
+        if (userClaims == null || !userClaims.Identity?.IsAuthenticated == true)
+        {
+            _logger.LogWarning("Usuário não autenticado");
+            return Result<Guid>.Unauthorized();
+        }
+
+        var userId = userClaims.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                     ?? userClaims.FindFirst("sub")?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            _logger.LogWarning("Claim 'sub' não encontrada no token");
+            return Result<Guid>.Unauthorized();
+        }
+
+        if (!Guid.TryParse(userId, out var userGuid))
+        {
+            _logger.LogWarning("UserId '{UserId}' não é um GUID válido", userId);
+            return Result<Guid>.Invalid(new ValidationError
+            {
+                ErrorMessage = "UserId inválido"
+            });
+        }
+
+        return Result<Guid>.Success(userGuid);
+    }
+
+    public Result<string> GetCurrentUserEmail()
+    {
+        var userClaims = _httpContextAccessor.HttpContext?.User;
+        
+        if (userClaims == null || !userClaims.Identity?.IsAuthenticated == true)
+        {
+            _logger.LogWarning("Usuário não autenticado");
+            return Result<string>.Unauthorized();
+        }
+
+        var email = userClaims.FindFirst(ClaimTypes.Email)?.Value
+                    ?? userClaims.FindFirst("email")?.Value;
+
+        if (string.IsNullOrEmpty(email))
+        {
+            _logger.LogWarning("Claim 'email' não encontrada no token");
+            return Result<string>.Error();
+        }
+
+        return Result<string>.Success(email);
+    }
+
+    public Result<string> GetCurrentUserName()
+    {
+        var userClaims = _httpContextAccessor.HttpContext?.User;
+        
+        if (userClaims == null || !userClaims.Identity?.IsAuthenticated == true)
+        {
+            _logger.LogWarning("Usuário não autenticado");
+            return Result<string>.Unauthorized();
+        }
+
+        var name = userClaims.FindFirst(ClaimTypes.Name)?.Value
+                   ?? userClaims.FindFirst("name")?.Value;
+
+        if (string.IsNullOrEmpty(name))
+        {
+            _logger.LogWarning("Claim 'name' não encontrada no token");
+            return Result<string>.Error();
+        }
+
+        return Result<string>.Success(name);
+    }
+
+    #endregion
 }

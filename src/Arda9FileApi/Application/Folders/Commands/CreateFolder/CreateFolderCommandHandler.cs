@@ -29,7 +29,7 @@ public class CreateFolderCommandHandler : IRequestHandler<CreateFolderCommand, R
             var bucket = await _bucketRepository.GetByIdAsync(request.BucketId);
             if (bucket == null)
             {
-                _logger.LogWarning("Bucket {BucketId} not found for company {CompanyId}", request.BucketId, request.CompanyId);
+                _logger.LogWarning("Bucket {BucketId} not found for company {CompanyId}", request.BucketId, request.TenantId);
                 return Result<CreateFolderResponse>.Error();
             }
 
@@ -53,7 +53,7 @@ public class CreateFolderCommandHandler : IRequestHandler<CreateFolderCommand, R
             }
 
             // Construir o path completo
-            string fullPath = await BuildFullPath(request.Path, request.ParentFolderId);
+            string fullPath = await BuildFullPath(request.ParentFolderId);
 
             // Verificar se já existe uma pasta com o mesmo nome no mesmo path
             var existingFolder = await _repository.GetByPathAndNameAsync(request.BucketId, fullPath, request.FolderName);

@@ -1,8 +1,9 @@
-using System.Net.Mime;
+using Arda9FileApi.Api.Extensions;
+using Arda9FileApi.Application.Files.Commands.UploadFile;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Arda9FileApi.Application.Files.Commands.UploadFile;
+using System.Net.Mime;
 
 namespace Arda9FileApi.Controllers;
 
@@ -20,34 +21,16 @@ public class FilesController : ControllerBase
         _logger = logger;
     }
 
-    [HttpPost]
+    [HttpPost("{tenantId}")]
     [Consumes(MediaTypeNames.Multipart.FormData)]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(typeof(UploadFileResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> UploadFileAsync([FromForm] UploadFileCommand command)
+    public async Task<IActionResult> UploadFileAsync(Guid tenantId, [FromForm] UploadFileCommand command)
     {
-        try
-        {
-            var result = await _mediator.Send(command);
-
-            if (result.IsSuccess)
-            {
-                return Ok(result.Value);
-            }
-
-            return result.Status switch
-            {
-                Ardalis.Result.ResultStatus.NotFound => NotFound(result.Errors),
-                Ardalis.Result.ResultStatus.Invalid => BadRequest(result.ValidationErrors),
-                _ => StatusCode(StatusCodes.Status500InternalServerError, result.Errors)
-            };
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Erro ao fazer upload do arquivo");
-            return StatusCode(StatusCodes.Status500InternalServerError, "Erro interno ao processar a requisição");
-        }
+        command.TenantId = tenantId;
+        var result = await _mediator.Send(command);
+        return result.ToActionResult();
     }
 }

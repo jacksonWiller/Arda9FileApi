@@ -1,3 +1,4 @@
+using Arda9FileApi.Api.Extensions;
 using Arda9FileApi.Application.Folders.Commands.CreateFolder;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -7,7 +8,7 @@ namespace Arda9FileApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-//[Authorize]
+[Authorize]
 public class FoldersController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -22,30 +23,14 @@ public class FoldersController : ControllerBase
     /// <summary>
     /// Cria uma nova pasta
     /// </summary>
-    [HttpPost]
+    [HttpPost("{tenantId}")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> CreateFolder([FromBody] CreateFolderCommand command)
+    public async Task<IActionResult> CreateFolder(Guid tenantId, [FromBody] CreateFolderCommand command)
     {
-        try
-        {
-            var result = await _mediator.Send(command);
-
-            if (result.IsSuccess)
-            {
-                return CreatedAtAction(
-                    nameof(CreateFolder),
-                    new { id = result.Value.Folder?.Id },
-                    result.Value);
-            }
-
-            return BadRequest(new { errors = result.Errors });
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error creating folder");
-            return StatusCode(500, new { message = "An error occurred while creating the folder" });
-        }
+        command.TenantId = tenantId;
+        var result = await _mediator.Send(command);
+        return result.ToActionResult();
     }
 }

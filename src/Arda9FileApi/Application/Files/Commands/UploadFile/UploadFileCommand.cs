@@ -8,7 +8,7 @@ public class UploadFileCommand : IRequest<Result<UploadFileResponse>>
 {
     public IFormFile File { get; set; } = null!;
     public string BucketName { get; set; } = string.Empty;
-    public Guid CompanyId { get; set; }
+    public Guid TenantId { get; set; }
     public Guid? SubCompanyId { get; set; }
     public Guid? ParentFolder { get; set; }
     public Guid? UploadedBy { get; set; }
