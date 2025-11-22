@@ -8,6 +8,8 @@ public interface IFileRepository
     Task<FileMetadataDto?> GetByS3KeyAsync(string s3Key);
     Task<List<FileMetadataDto>> GetByCompanyIdAsync(Guid companyId);
     Task<List<FileMetadataDto>> GetByBucketNameAsync(string bucketName);
+    Task<List<FileMetadataDto>> GetByBucketIdAsync(Guid bucketId);
+    Task<List<FileMetadataDto>> GetByFolderIdAsync(Guid folderId);
     Task<List<FileMetadataDto>> GetAllAsync();
     Task CreateAsync(FileMetadataDto fileMetadata);
     Task UpdateAsync(FileMetadataDto fileMetadata);

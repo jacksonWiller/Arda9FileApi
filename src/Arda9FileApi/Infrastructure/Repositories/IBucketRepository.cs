@@ -5,6 +5,7 @@ namespace Arda9FileApi.Infrastructure.Repositories;
 public interface IBucketRepository
 {
     Task<BucketDto?> GetByIdAsync(Guid id);
+    Task<bool> ExistsAsync(Guid id);
     Task<BucketDto?> GetByBucketNameAsync(string bucketName);
     Task<List<BucketDto>> GetByCompanyIdAsync(Guid companyId);
     Task<List<BucketDto>> GetAllAsync();

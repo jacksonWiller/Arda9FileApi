@@ -8,23 +8,22 @@ public class FileRepository : IFileRepository
 {
     private readonly IDynamoDBContext _context;
     private readonly ILogger<FileRepository> _logger;
-    private readonly IBucketRepository _bucketRepository;
 
     public FileRepository(
         IDynamoDBContext context, 
-        ILogger<FileRepository> logger,
-        IBucketRepository bucketRepository)
+        ILogger<FileRepository> logger)
     {
         _context = context;
         _logger = logger;
-        _bucketRepository = bucketRepository;
     }
 
     public async Task<FileMetadataDto?> GetByIdAsync(Guid fileId)
     {
         try
         {
-            return await _context.LoadAsync<FileMetadataDto>($"FILE#{fileId}", "METADATA");
+            var pk = $"FILE#{fileId}";
+            var sk = "METADATA";
+            return await _context.LoadAsync<FileMetadataDto>(pk, sk);
         }
         catch (Exception ex)
         {
@@ -40,7 +39,8 @@ public class FileRepository : IFileRepository
             var conditions = new List<ScanCondition>
             {
                 new ScanCondition("S3Key", ScanOperator.Equal, s3Key),
-                new ScanCondition("IsDeleted", ScanOperator.Equal, false)
+                new ScanCondition("IsDeleted", ScanOperator.Equal, false),
+                new ScanCondition("EntityType", ScanOperator.Equal, "FILE")
             };
 
             var search = _context.ScanAsync<FileMetadataDto>(conditions);
@@ -58,14 +58,17 @@ public class FileRepository : IFileRepository
     {
         try
         {
-            var conditions = new List<ScanCondition>
-            {
-                new ScanCondition("CompanyId", ScanOperator.Equal, companyId),
-                new ScanCondition("IsDeleted", ScanOperator.Equal, false)
-            };
+            // Usar GSI3 para buscar por Company
+            var search = _context.QueryAsync<FileMetadataDto>(
+                $"COMPANY#{companyId}",
+                new DynamoDBOperationConfig
+                {
+                    IndexName = "GSI3-Index"
+                }
+            );
 
-            var search = _context.ScanAsync<FileMetadataDto>(conditions);
-            return await search.GetRemainingAsync();
+            var results = await search.GetRemainingAsync();
+            return results.Where(f => !f.IsDeleted).ToList();
         }
         catch (Exception ex)
         {
@@ -81,7 +84,8 @@ public class FileRepository : IFileRepository
             var conditions = new List<ScanCondition>
             {
                 new ScanCondition("BucketName", ScanOperator.Equal, bucketName),
-                new ScanCondition("IsDeleted", ScanOperator.Equal, false)
+                new ScanCondition("IsDeleted", ScanOperator.Equal, false),
+                new ScanCondition("EntityType", ScanOperator.Equal, "FILE")
             };
 
             var search = _context.ScanAsync<FileMetadataDto>(conditions);
@@ -94,13 +98,60 @@ public class FileRepository : IFileRepository
         }
     }
 
+    public async Task<List<FileMetadataDto>> GetByBucketIdAsync(Guid bucketId)
+    {
+        try
+        {
+            // Usar GSI1 para buscar arquivos por Bucket
+            var search = _context.QueryAsync<FileMetadataDto>(
+                $"BUCKET#{bucketId}",
+                new DynamoDBOperationConfig
+                {
+                    IndexName = "GSI1-Index"
+                }
+            );
+
+            var results = await search.GetRemainingAsync();
+            return results.Where(f => !f.IsDeleted).ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao buscar arquivos por BucketId: {BucketId}", bucketId);
+            throw;
+        }
+    }
+
+    public async Task<List<FileMetadataDto>> GetByFolderIdAsync(Guid folderId)
+    {
+        try
+        {
+            // Usar GSI2 para buscar arquivos por Folder
+            var search = _context.QueryAsync<FileMetadataDto>(
+                $"FOLDER#{folderId}",
+                new DynamoDBOperationConfig
+                {
+                    IndexName = "GSI2-Index"
+                }
+            );
+
+            var results = await search.GetRemainingAsync();
+            return results.Where(f => !f.IsDeleted).ToList();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao buscar arquivos por FolderId: {FolderId}", folderId);
+            throw;
+        }
+    }
+
     public async Task<List<FileMetadataDto>> GetAllAsync()
     {
         try
         {
             var conditions = new List<ScanCondition>
             {
-                new ScanCondition("IsDeleted", ScanOperator.Equal, false)
+                new ScanCondition("IsDeleted", ScanOperator.Equal, false),
+                new ScanCondition("EntityType", ScanOperator.Equal, "FILE")
             };
 
             var search = _context.ScanAsync<FileMetadataDto>(conditions);
@@ -117,32 +168,30 @@ public class FileRepository : IFileRepository
     {
         try
         {
-            // Salvar o arquivo no DynamoDB
-            //await _context.SaveAsync(fileMetadata);
+            // Definir PK, SK e EntityType
+            fileMetadata.PK = $"FILE#{fileMetadata.FileId}";
+            fileMetadata.SK = "METADATA";
+            fileMetadata.EntityType = "FILE";
 
-            // Buscar o bucket
-            var bucket = await _bucketRepository.GetByBucketNameAsync(fileMetadata.BucketName);
+            // Definir GSIs
+            fileMetadata.GSI1PK = $"BUCKET#{fileMetadata.BucketId}";
+            fileMetadata.GSI1SK = $"FILE#{fileMetadata.FileId}";
             
-            if (bucket != null)
+            if (fileMetadata.FolderId.HasValue)
             {
-                // Adicionar o arquivo à lista de arquivos do bucket
-                bucket.Files.Add(fileMetadata);
-                
-                // Atualizar o bucket
-                await _bucketRepository.UpdateAsync(bucket);
-                
-                _logger.LogInformation(
-                    "Arquivo {FileName} criado e adicionado ao bucket {BucketName}", 
-                    fileMetadata.FileName, 
-                    fileMetadata.BucketName);
+                fileMetadata.GSI2PK = $"FOLDER#{fileMetadata.FolderId.Value}";
+                fileMetadata.GSI2SK = $"FILE#{fileMetadata.FileId}";
             }
-            else
-            {
-                _logger.LogWarning(
-                    "Bucket {BucketName} não encontrado ao criar arquivo {FileName}", 
-                    fileMetadata.BucketName, 
-                    fileMetadata.FileName);
-            }
+
+            fileMetadata.GSI3PK = $"COMPANY#{fileMetadata.CompanyId}";
+
+            // Salvar o arquivo no DynamoDB
+            await _context.SaveAsync(fileMetadata);
+            
+            _logger.LogInformation(
+                "Arquivo {FileName} criado com ID {FileId}", 
+                fileMetadata.FileName, 
+                fileMetadata.FileId);
         }
         catch (Exception ex)
         {
@@ -157,48 +206,35 @@ public class FileRepository : IFileRepository
         {
             // Atualizar data de modificação
             fileMetadata.UpdatedAt = DateTime.UtcNow;
-            
-            // Salvar arquivo atualizado no DynamoDB
-            await _context.SaveAsync(fileMetadata);
 
-            // Buscar o bucket
-            var bucket = await _bucketRepository.GetByBucketNameAsync(fileMetadata.BucketName);
+            // Garantir que PK, SK e EntityType estejam corretos
+            fileMetadata.PK = $"FILE#{fileMetadata.FileId}";
+            fileMetadata.SK = "METADATA";
+            fileMetadata.EntityType = "FILE";
+
+            // Atualizar GSIs
+            fileMetadata.GSI1PK = $"BUCKET#{fileMetadata.BucketId}";
+            fileMetadata.GSI1SK = $"FILE#{fileMetadata.FileId}";
             
-            if (bucket != null)
+            if (fileMetadata.FolderId.HasValue)
             {
-                // Encontrar e atualizar o arquivo na lista do bucket
-                var existingFile = bucket.Files.FirstOrDefault(f => f.FileId == fileMetadata.FileId);
-                
-                if (existingFile != null)
-                {
-                    // Remover versão antiga
-                    bucket.Files.Remove(existingFile);
-                    // Adicionar versão atualizada
-                    bucket.Files.Add(fileMetadata);
-                    
-                    // Atualizar o bucket
-                    await _bucketRepository.UpdateAsync(bucket);
-                    
-                    _logger.LogInformation(
-                        "Arquivo {FileId} atualizado no bucket {BucketName}", 
-                        fileMetadata.FileId, 
-                        fileMetadata.BucketName);
-                }
-                else
-                {
-                    _logger.LogWarning(
-                        "Arquivo {FileId} não encontrado na lista do bucket {BucketName}", 
-                        fileMetadata.FileId, 
-                        fileMetadata.BucketName);
-                }
+                fileMetadata.GSI2PK = $"FOLDER#{fileMetadata.FolderId.Value}";
+                fileMetadata.GSI2SK = $"FILE#{fileMetadata.FileId}";
             }
             else
             {
-                _logger.LogWarning(
-                    "Bucket {BucketName} não encontrado ao atualizar arquivo {FileId}", 
-                    fileMetadata.BucketName, 
-                    fileMetadata.FileId);
+                fileMetadata.GSI2PK = string.Empty;
+                fileMetadata.GSI2SK = string.Empty;
             }
+
+            fileMetadata.GSI3PK = $"COMPANY#{fileMetadata.CompanyId}";
+            
+            // Salvar arquivo atualizado no DynamoDB
+            await _context.SaveAsync(fileMetadata);
+            
+            _logger.LogInformation(
+                "Arquivo {FileId} atualizado", 
+                fileMetadata.FileId);
         }
         catch (Exception ex)
         {
@@ -222,42 +258,8 @@ public class FileRepository : IFileRepository
                 
                 // Salvar no DynamoDB
                 await _context.SaveAsync(file);
-
-                // Buscar o bucket
-                var bucket = await _bucketRepository.GetByBucketNameAsync(file.BucketName);
                 
-                if (bucket != null)
-                {
-                    // Remover o arquivo da lista do bucket
-                    var fileToRemove = bucket.Files.FirstOrDefault(f => f.FileId == fileId);
-                    
-                    if (fileToRemove != null)
-                    {
-                        bucket.Files.Remove(fileToRemove);
-                        
-                        // Atualizar o bucket
-                        await _bucketRepository.UpdateAsync(bucket);
-                        
-                        _logger.LogInformation(
-                            "Arquivo {FileId} deletado e removido do bucket {BucketName}", 
-                            fileId, 
-                            file.BucketName);
-                    }
-                    else
-                    {
-                        _logger.LogWarning(
-                            "Arquivo {FileId} não encontrado na lista do bucket {BucketName}", 
-                            fileId, 
-                            file.BucketName);
-                    }
-                }
-                else
-                {
-                    _logger.LogWarning(
-                        "Bucket {BucketName} não encontrado ao deletar arquivo {FileId}", 
-                        file.BucketName, 
-                        fileId);
-                }
+                _logger.LogInformation("Arquivo {FileId} deletado", fileId);
             }
             else
             {

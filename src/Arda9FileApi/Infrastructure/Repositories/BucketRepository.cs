@@ -19,11 +19,27 @@ public class BucketRepository : IBucketRepository
     {
         try
         {
-            return await _context.LoadAsync<BucketDto>(id);
+            var pk = $"BUCKET#{id}";
+            var sk = "METADATA";
+            return await _context.LoadAsync<BucketDto>(pk, sk);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Erro ao buscar bucket por ID: {Id}", id);
+            throw;
+        }
+    }
+
+    public async Task<bool> ExistsAsync(Guid id)
+    {
+        try
+        {
+            var result = await GetByIdAsync(id);
+            return result != null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao verificar existência do bucket: {Id}", id);
             throw;
         }
     }
@@ -35,7 +51,8 @@ public class BucketRepository : IBucketRepository
             var conditions = new List<ScanCondition>
             {
                 new ScanCondition("BucketName", ScanOperator.Equal, bucketName),
-                new ScanCondition("Status", ScanOperator.NotEqual, "deleted")
+                new ScanCondition("Status", ScanOperator.NotEqual, "deleted"),
+                new ScanCondition("EntityType", ScanOperator.Equal, "BUCKET")
             };
 
             var search = _context.ScanAsync<BucketDto>(conditions);
@@ -53,15 +70,17 @@ public class BucketRepository : IBucketRepository
     {
         try
         {
+            // Usar GSI3 para buscar buckets por Company
             var search = _context.QueryAsync<BucketDto>(
                 $"COMPANY#{companyId}",
                 new DynamoDBOperationConfig
                 {
-                    IndexName = "CompanyIndex"
+                    IndexName = "GSI3-Index"
                 }
             );
 
-            return await search.GetRemainingAsync();
+            var results = await search.GetRemainingAsync();
+            return results.Where(b => b.EntityType == "BUCKET").ToList();
         }
         catch (Exception ex)
         {
@@ -74,7 +93,12 @@ public class BucketRepository : IBucketRepository
     {
         try
         {
-            var search = _context.ScanAsync<BucketDto>(new List<ScanCondition>());
+            var conditions = new List<ScanCondition>
+            {
+                new ScanCondition("EntityType", ScanOperator.Equal, "BUCKET")
+            };
+
+            var search = _context.ScanAsync<BucketDto>(conditions);
             return await search.GetRemainingAsync();
         }
         catch (Exception ex)
@@ -88,7 +112,15 @@ public class BucketRepository : IBucketRepository
     {
         try
         {
+            bucket.PK = $"BUCKET#{bucket.Id}";
+            bucket.SK = "METADATA";
+            bucket.EntityType = "BUCKET";
+            bucket.GSI3PK = $"COMPANY#{bucket.CompanyId}";
+            
             await _context.SaveAsync(bucket);
+            
+            _logger.LogInformation("Bucket {BucketName} criado com ID {BucketId}", 
+                bucket.BucketName, bucket.Id);
         }
         catch (Exception ex)
         {
@@ -102,7 +134,14 @@ public class BucketRepository : IBucketRepository
         try
         {
             bucket.UpdatedAt = DateTime.UtcNow;
+            bucket.PK = $"BUCKET#{bucket.Id}";
+            bucket.SK = "METADATA";
+            bucket.EntityType = "BUCKET";
+            bucket.GSI3PK = $"COMPANY#{bucket.CompanyId}";
+            
             await _context.SaveAsync(bucket);
+            
+            _logger.LogInformation("Bucket {BucketId} atualizado", bucket.Id);
         }
         catch (Exception ex)
         {
@@ -115,7 +154,7 @@ public class BucketRepository : IBucketRepository
     {
         try
         {
-            var bucket = await _context.LoadAsync<BucketDto>(id);
+            var bucket = await GetByIdAsync(id);
             
             if (bucket == null)
             {

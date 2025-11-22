@@ -1,9 +1,9 @@
 # More information about the configuration file can be found here:
 # https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-config.html
-version = 0.1
+version = 0.2
 
 [default.global.parameters]
-stack_name = "arda9-file-api-v1"
+stack_name = "arda9-file-api-v3"
 
 [default.build.parameters]
 cached = true

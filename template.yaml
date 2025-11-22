@@ -38,17 +38,58 @@ Resources:
             Path: /
             Method: ANY
 
-  # DynamoDB table to store item: {id: &lt;ID&gt;, name: &lt;NAME&gt;}
+  # DynamoDB Single Table Design with PK/SK
   SampleTable:
-    Type: AWS::Serverless::SimpleTable
+    Type: AWS::DynamoDB::Table
     Properties:
-      TableName: arda9-file-v1
-      PrimaryKey:
-        Name: Id
-        Type: String
-      ProvisionedThroughput:
-        ReadCapacityUnits: 2
-        WriteCapacityUnits: 2
+      TableName: arda9-file-v3
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+        - AttributeName: GSI1PK
+          AttributeType: S
+        - AttributeName: GSI1SK
+          AttributeType: S
+        - AttributeName: GSI2PK
+          AttributeType: S
+        - AttributeName: GSI2SK
+          AttributeType: S
+        - AttributeName: GSI3PK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        # GSI1: Para queries por Bucket (listar arquivos/folders por bucket)
+        - IndexName: GSI1-Index
+          KeySchema:
+            - AttributeName: GSI1PK
+              KeyType: HASH
+            - AttributeName: GSI1SK
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        # GSI2: Para queries por Folder (listar arquivos por folder)
+        - IndexName: GSI2-Index
+          KeySchema:
+            - AttributeName: GSI2PK
+              KeyType: HASH
+            - AttributeName: GSI2SK
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+        # GSI3: Para queries por Company (listar buckets/folders/arquivos por empresa)
+        - IndexName: GSI3-Index
+          KeySchema:
+            - AttributeName: GSI3PK
+              KeyType: HASH
+          Projection:
+            ProjectionType: ALL
 
 Outputs:
   WebEndpoint:

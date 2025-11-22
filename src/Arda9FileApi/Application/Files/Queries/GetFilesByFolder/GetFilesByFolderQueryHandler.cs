@@ -39,15 +39,8 @@ public class GetFilesByFolderQueryHandler : IRequestHandler<GetFilesByFolderQuer
                 return Result<List<FileMetadataDto>>.Forbidden();
             }
 
-            var folderPath = string.IsNullOrEmpty(folder.Path) 
-                ? folder.FolderName 
-                : $"{folder.Path}/{folder.FolderName}";
-
-            var allFiles = await _fileRepository.GetByCompanyIdAsync(request.TenantId);
-            
-            var folderFiles = allFiles
-                .Where(f => !f.IsDeleted && f.Folder == folderPath)
-                .ToList();
+            // Usar GSI2 para buscar arquivos por FolderId
+            var folderFiles = await _fileRepository.GetByFolderIdAsync(request.FolderId);
 
             return Result<List<FileMetadataDto>>.Success(folderFiles);
         }

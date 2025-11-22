@@ -8,23 +8,22 @@ public class FolderRepository : IFolderRepository
 {
     private readonly IDynamoDBContext _context;
     private readonly ILogger<FolderRepository> _logger;
-    private readonly IBucketRepository _bucketRepository;
 
     public FolderRepository(
         IDynamoDBContext context, 
-        ILogger<FolderRepository> logger,
-        IBucketRepository bucketRepository)
+        ILogger<FolderRepository> logger)
     {
         _context = context;
         _logger = logger;
-        _bucketRepository = bucketRepository;
     }
 
     public async Task<FolderDto?> GetByIdAsync(Guid folderId)
     {
         try
         {
-            var folder = await _context.LoadAsync<FolderDto>(folderId);
+            var pk = $"FOLDER#{folderId}";
+            var sk = "METADATA";
+            var folder = await _context.LoadAsync<FolderDto>(pk, sk);
             return folder?.IsDeleted == false ? folder : null;
         }
         catch (Exception ex)
@@ -43,7 +42,8 @@ public class FolderRepository : IFolderRepository
                 new ScanCondition("BucketId", ScanOperator.Equal, bucketId),
                 new ScanCondition("Path", ScanOperator.Equal, path),
                 new ScanCondition("FolderName", ScanOperator.Equal, folderName),
-                new ScanCondition("IsDeleted", ScanOperator.Equal, false)
+                new ScanCondition("IsDeleted", ScanOperator.Equal, false),
+                new ScanCondition("EntityType", ScanOperator.Equal, "FOLDER")
             };
 
             var search = _context.ScanAsync<FolderDto>(conditions);
@@ -61,16 +61,17 @@ public class FolderRepository : IFolderRepository
     {
         try
         {
+            // Usar GSI1 para buscar folders por Bucket
             var search = _context.QueryAsync<FolderDto>(
                 $"BUCKET#{bucketId}",
                 new DynamoDBOperationConfig
                 {
-                    IndexName = "BucketIndex"
+                    IndexName = "GSI1-Index"
                 }
             );
 
             var results = await search.GetRemainingAsync();
-            return results.Where(f => !f.IsDeleted).ToList();
+            return results.Where(f => !f.IsDeleted && f.EntityType == "FOLDER").ToList();
         }
         catch (Exception ex)
         {
@@ -86,7 +87,8 @@ public class FolderRepository : IFolderRepository
             var conditions = new List<ScanCondition>
             {
                 new ScanCondition("ParentFolderId", ScanOperator.Equal, parentFolderId),
-                new ScanCondition("IsDeleted", ScanOperator.Equal, false)
+                new ScanCondition("IsDeleted", ScanOperator.Equal, false),
+                new ScanCondition("EntityType", ScanOperator.Equal, "FOLDER")
             };
 
             var search = _context.ScanAsync<FolderDto>(conditions);
@@ -103,16 +105,17 @@ public class FolderRepository : IFolderRepository
     {
         try
         {
+            // Usar GSI3 para buscar folders por Company
             var search = _context.QueryAsync<FolderDto>(
                 $"COMPANY#{companyId}",
                 new DynamoDBOperationConfig
                 {
-                    IndexName = "CompanyIndex"
+                    IndexName = "GSI3-Index"
                 }
             );
 
             var results = await search.GetRemainingAsync();
-            return results.Where(f => !f.IsDeleted).ToList();
+            return results.Where(f => !f.IsDeleted && f.EntityType == "FOLDER").ToList();
         }
         catch (Exception ex)
         {
@@ -125,30 +128,23 @@ public class FolderRepository : IFolderRepository
     {
         try
         {
-            // Buscar o bucket
-            var bucket = await _bucketRepository.GetByIdAsync(folder.BucketId);
+            // Definir PK, SK e EntityType
+            folder.PK = $"FOLDER#{folder.Id}";
+            folder.SK = "METADATA";
+            folder.EntityType = "FOLDER";
+
+            // Definir GSIs
+            folder.GSI1PK = $"BUCKET#{folder.BucketId}";
+            folder.GSI1SK = $"FOLDER#{folder.Id}";
+            folder.GSI3PK = $"COMPANY#{folder.CompanyId}";
+
+            // Salvar no DynamoDB
+            await _context.SaveAsync(folder);
             
-            if (bucket != null)
-            {
-                // Adicionar a pasta à lista de pastas do bucket
-                bucket.Folders.Add(folder);
-                
-                // Atualizar o bucket
-                await _bucketRepository.UpdateAsync(bucket);
-                
-                _logger.LogInformation(
-                    "Folder {FolderName} created and added to bucket {BucketId}", 
-                    folder.FolderName, 
-                    folder.BucketId);
-            }
-            else
-            {
-                _logger.LogWarning(
-                    "Bucket {BucketId} not found when creating folder {FolderName}", 
-                    folder.BucketId, 
-                    folder.FolderName);
-                throw new InvalidOperationException($"Bucket {folder.BucketId} not found");
-            }
+            _logger.LogInformation(
+                "Folder {FolderName} created with ID {FolderId}", 
+                folder.FolderName, 
+                folder.Id);
         }
         catch (Exception ex)
         {
@@ -163,34 +159,23 @@ public class FolderRepository : IFolderRepository
         {
             // Atualizar data de modificação
             folder.UpdatedAt = DateTime.UtcNow;
+
+            // Garantir que PK, SK e EntityType estejam corretos
+            folder.PK = $"FOLDER#{folder.Id}";
+            folder.SK = "METADATA";
+            folder.EntityType = "FOLDER";
+
+            // Atualizar GSIs
+            folder.GSI1PK = $"BUCKET#{folder.BucketId}";
+            folder.GSI1SK = $"FOLDER#{folder.Id}";
+            folder.GSI3PK = $"COMPANY#{folder.CompanyId}";
             
             // Salvar pasta atualizada no DynamoDB
             await _context.SaveAsync(folder);
-
-            // Buscar o bucket
-            var bucket = await _bucketRepository.GetByIdAsync(folder.BucketId);
             
-            if (bucket != null)
-            {
-                // Encontrar e atualizar a pasta na lista do bucket
-                var existingFolder = bucket.Folders.FirstOrDefault(f => f.Id == folder.Id);
-                
-                if (existingFolder != null)
-                {
-                    // Remover versão antiga
-                    bucket.Folders.Remove(existingFolder);
-                    // Adicionar versão atualizada
-                    bucket.Folders.Add(folder);
-                    
-                    // Atualizar o bucket
-                    await _bucketRepository.UpdateAsync(bucket);
-                    
-                    _logger.LogInformation(
-                        "Folder {FolderId} updated in bucket {BucketId}", 
-                        folder.Id, 
-                        folder.BucketId);
-                }
-            }
+            _logger.LogInformation(
+                "Folder {FolderId} updated", 
+                folder.Id);
         }
         catch (Exception ex)
         {
@@ -214,28 +199,8 @@ public class FolderRepository : IFolderRepository
                 
                 // Salvar no DynamoDB
                 await _context.SaveAsync(folder);
-
-                // Buscar o bucket
-                var bucket = await _bucketRepository.GetByIdAsync(folder.BucketId);
                 
-                if (bucket != null)
-                {
-                    // Remover a pasta da lista do bucket
-                    var folderToRemove = bucket.Folders.FirstOrDefault(f => f.Id == folderId);
-                    
-                    if (folderToRemove != null)
-                    {
-                        bucket.Folders.Remove(folderToRemove);
-                        
-                        // Atualizar o bucket
-                        await _bucketRepository.UpdateAsync(bucket);
-                        
-                        _logger.LogInformation(
-                            "Folder {FolderId} deleted and removed from bucket {BucketId}", 
-                            folderId, 
-                            folder.BucketId);
-                    }
-                }
+                _logger.LogInformation("Folder {FolderId} deleted", folderId);
             }
             else
             {
