@@ -25,6 +25,7 @@ public class GetFilesByFolderQueryHandler : IRequestHandler<GetFilesByFolderQuer
     {
         try
         {
+            //await _repository.GetByIdAsync(request.FolderId);
             var folder = await _folderRepository.GetByIdAsync(request.FolderId);
             if (folder == null || folder.IsDeleted)
             {

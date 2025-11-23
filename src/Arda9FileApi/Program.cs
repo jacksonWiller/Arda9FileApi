@@ -28,6 +28,17 @@ builder.Logging
         .ClearProviders()
         .AddJsonConsole();
 
+// Configurar CORS
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 // Configurar as opções do AWS Cognito
 builder.Services.Configure<AwsCognitoConfig>(
     builder.Configuration.GetSection("AwsCognito"));
@@ -149,6 +160,9 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Arda9 File API v1");
     c.RoutePrefix = string.Empty; // Define o Swagger como página inicial
 });
+
+// Habilitar CORS
+app.UseCors();
 
 app.UseHttpsRedirection();
 
