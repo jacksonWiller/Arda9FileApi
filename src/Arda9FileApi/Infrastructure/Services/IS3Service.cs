@@ -13,6 +13,7 @@ public interface IS3Service
     Task<bool> SetObjectAclAsync(string bucketName, string key, bool isPublic, CancellationToken cancellationToken = default);
     Task<bool> SetBucketPublicAccessAsync(string bucketName, CancellationToken cancellationToken = default);
     Task<bool> CreatePublicBucketAsync(string bucketName, CancellationToken cancellationToken = default);
+    Task<bool> CreateBucketAsync(string bucketName, CancellationToken cancellationToken = default);
     Task<bool> SetBucketPolicyForPublicReadAsync(string bucketName, CancellationToken cancellationToken = default);
     string BuildS3Key(string? folder, Guid fileId, string fileName);
     string BuildS3Key(string? folder, string fileName);

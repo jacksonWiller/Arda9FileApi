@@ -18,6 +18,28 @@ public class S3Service : IS3Service
         _logger = logger;
     }
 
+    public async Task<bool> CreateBucketAsync(string bucketName, CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var putBucketRequest = new PutBucketRequest
+            {
+                BucketName = bucketName,
+                UseClientRegion = true
+            };
+
+            await _s3Client.PutBucketAsync(putBucketRequest, cancellationToken);
+            _logger.LogInformation("Bucket privado {BucketName} criado com sucesso", bucketName);
+            
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Erro ao criar bucket: {BucketName}", bucketName);
+            throw;
+        }
+    }
+
     public async Task<bool> CreatePublicBucketAsync(string bucketName, CancellationToken cancellationToken = default)
     {
         try

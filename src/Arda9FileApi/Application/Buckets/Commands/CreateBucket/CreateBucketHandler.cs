@@ -1,8 +1,7 @@
-using Amazon.S3;
-using Amazon.S3.Model;
 using Arda9FileApi.Application.DTOs;
 using Arda9FileApi.Application.Services;
 using Arda9FileApi.Infrastructure.Repositories;
+using Arda9FileApi.Infrastructure.Services;
 using Ardalis.Result;
 using Ardalis.Result.FluentValidation;
 using FluentValidation;
@@ -12,20 +11,20 @@ namespace Arda9FileApi.Application.Buckets.Commands.CreateBucket;
 
 public class CreateBucketHandler : IRequestHandler<CreateBucketCommand, Result<CreateBucketResponse>>
 {
-    private readonly IAmazonS3 _s3Client;
+    private readonly IS3Service _s3Service;
     private readonly IBucketRepository _bucketRepository;
     private readonly IValidator<CreateBucketCommand> _validator;
     private readonly ILogger<CreateBucketHandler> _logger;
     private readonly IAuthService _authService;
 
     public CreateBucketHandler(
-        IAmazonS3 s3Client,
+        IS3Service s3Service,
         IBucketRepository bucketRepository,
         IValidator<CreateBucketCommand> validator,
         IAuthService authService,
         ILogger<CreateBucketHandler> logger)
     {
-        _s3Client = s3Client;
+        _s3Service = s3Service;
         _bucketRepository = bucketRepository;
         _validator = validator;
         _authService = authService;
@@ -57,14 +56,28 @@ public class CreateBucketHandler : IRequestHandler<CreateBucketCommand, Result<C
                 return Result<CreateBucketResponse>.Error();
             }
 
-            // Criar bucket no S3
-            var bucketRequest = new PutBucketRequest
+            // Verificar se bucket já existe no S3
+            var bucketExists = await _s3Service.BucketExistsAsync(request.BucketName, cancellationToken);
+            if (bucketExists)
             {
-                BucketName = request.BucketName,
-                UseClientRegion = true
-            };
+                return Result<CreateBucketResponse>.Error();
+            }
 
-            await _s3Client.PutBucketAsync(bucketRequest, cancellationToken);
+            // Criar bucket no S3 usando o S3Service
+            bool bucketCreated;
+            if (request.IsPublic)
+            {
+                bucketCreated = await _s3Service.CreatePublicBucketAsync(request.BucketName, cancellationToken);
+            }
+            else
+            {
+                bucketCreated = await _s3Service.CreateBucketAsync(request.BucketName, cancellationToken);
+            }
+
+            if (!bucketCreated)
+            {
+                return Result<CreateBucketResponse>.Error();
+            }
 
             // Criar registro no DynamoDB
             var bucketDto = new BucketDto
@@ -81,19 +94,14 @@ public class CreateBucketHandler : IRequestHandler<CreateBucketCommand, Result<C
 
             await _bucketRepository.CreateAsync(bucketDto);
 
-            _logger.LogInformation("Bucket {BucketName} criado com sucesso pelo usuário {UserId}", 
-                request.BucketName, userIdResult.Value);
+            _logger.LogInformation("Bucket {BucketName} criado com sucesso pelo usuário {UserId} (Público: {IsPublic})", 
+                request.BucketName, userIdResult.Value, request.IsPublic);
 
             return Result<CreateBucketResponse>.Success(new CreateBucketResponse
             {
                 Bucket = bucketDto,
                 Message = "Bucket criado com sucesso"
             });
-        }
-        catch (AmazonS3Exception ex)
-        {
-            _logger.LogError(ex, "Erro ao criar bucket no S3: {BucketName}", request.BucketName);
-            return Result<CreateBucketResponse>.Error();
         }
         catch (Exception ex)
         {

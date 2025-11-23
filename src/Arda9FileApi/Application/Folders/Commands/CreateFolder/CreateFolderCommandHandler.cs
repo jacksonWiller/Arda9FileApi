@@ -36,7 +36,8 @@ public class CreateFolderCommandHandler : IRequestHandler<CreateFolderCommand, R
             // Se informado ParentFolderId, verificar se existe
             if (request.ParentFolderId.HasValue)
             {
-                var parentFolder = bucket.Folders.FirstOrDefault(x => x.Id == request.ParentFolderId.Value);
+                //var folder = await _repository.GetByIdAsync(request.FolderId);
+                var parentFolder = await _repository.GetByIdAsync(request.ParentFolderId.Value);
                 if (parentFolder == null || parentFolder.IsDeleted)
                 {
                     _logger.LogWarning("Parent folder {ParentFolderId} not found", request.ParentFolderId);

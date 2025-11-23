@@ -75,7 +75,7 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
             // Se informado ParentFolderId, verificar se existe
             if (request.FolderId.HasValue)
             {
-                var parentFolder = bucket.Folders.FirstOrDefault(x => x.Id == request.FolderId.Value);
+                var parentFolder = await _folderRepository.GetByIdAsync(request.FolderId.Value);
                 if (parentFolder == null || parentFolder.IsDeleted)
                 {
                     _logger.LogWarning("Parent folder {ParentFolderId} not found", request.FolderId);
