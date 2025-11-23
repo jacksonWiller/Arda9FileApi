@@ -1,7 +1,11 @@
-using Ardalis.Result;
+using Amazon.S3;
+using Arda9FileApi.Application.Buckets.Commands.CreateBucket;
 using Arda9FileApi.Application.DTOs;
+using Arda9FileApi.Application.Services;
 using Arda9FileApi.Infrastructure.Repositories;
 using Arda9FileApi.Infrastructure.Services;
+using Ardalis.Result;
+using FluentValidation;
 using MediatR;
 
 namespace Arda9FileApi.Application.Files.Commands.UploadFile;
@@ -12,32 +16,49 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
     private readonly IBucketRepository _bucketRepository;
     private readonly IFolderRepository _folderRepository;
     private readonly IS3Service _s3Service;
+    private readonly IAmazonS3 _s3Client;
     private readonly ILogger<UploadFileCommandHandler> _logger;
+    private readonly IValidator<CreateBucketCommand> _validator;
+    private readonly IAuthService _authService;
 
     public UploadFileCommandHandler(
         IFileRepository fileRepository,
         IBucketRepository bucketRepository,
         IFolderRepository folderRepository,
         IS3Service s3Service,
-        ILogger<UploadFileCommandHandler> logger)
+        IAmazonS3 s3Client,
+        ILogger<UploadFileCommandHandler> logger,
+        IValidator<CreateBucketCommand> validator,
+        IAuthService authService
+        )
     {
         _fileRepository = fileRepository;
         _bucketRepository = bucketRepository;
         _folderRepository = folderRepository;
         _s3Service = s3Service;
+        _s3Client = s3Client;
+        _validator = validator;
         _logger = logger;
+        _authService = authService;
     }
 
     public async Task<Result<UploadFileResponse>> Handle(UploadFileCommand request, CancellationToken cancellationToken)
     {
         try
         {
-            // Validar se o bucket existe
-            var bucket = await _bucketRepository.GetByBucketNameAsync(request.BucketName);
+            // Obter ID do usuário autenticado
+            var userIdResult = _authService.GetCurrentUserId();
+            if (!userIdResult.IsSuccess)
+            {
+                return Result.Unauthorized();
+            }
+
+            // Verificar se o bucket existe
+            var bucket = await _bucketRepository.GetByIdAsync(request.BucketId);
             if (bucket == null)
             {
-                _logger.LogWarning("Bucket not found: {BucketName}", request.BucketName);
-                return Result.NotFound($"Bucket '{request.BucketName}' not found");
+                _logger.LogWarning("Bucket {BucketId} not found for company {CompanyId}", request.BucketId, request.TenantId);
+                return Result<UploadFileResponse>.Error();
             }
 
             // Validar se o arquivo foi enviado
@@ -51,37 +72,27 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
                 });
             }
 
-            // Se informado FolderId, verificar se a pasta existe
-            FolderDto? folder = null;
-            if (request.ParentFolder.HasValue)
+            // Se informado ParentFolderId, verificar se existe
+            if (request.FolderId.HasValue)
             {
-                folder = bucket.Folders
-                    .FirstOrDefault(f => f.Id == request.ParentFolder.Value && !f.IsDeleted);
-                if (folder == null || folder.IsDeleted)
+                var parentFolder = bucket.Folders.FirstOrDefault(x => x.Id == request.FolderId.Value);
+                if (parentFolder == null || parentFolder.IsDeleted)
                 {
-                    _logger.LogWarning("Folder {FolderId} not found", request.ParentFolder);
+                    _logger.LogWarning("Parent folder {ParentFolderId} not found", request.FolderId);
                     return Result.Error();
                 }
 
-                // Verificar se a pasta pertence ao mesmo bucket
-                if (folder.BucketId != bucket.Id)
+                // Verificar se a pasta pai pertence ao mesmo bucket
+                if (parentFolder.BucketId != request.BucketId)
                 {
-                    _logger.LogWarning("Folder {FolderId} does not belong to bucket {BucketId}", 
-                        request.ParentFolder.Value, bucket.Id);
+                    _logger.LogWarning("Parent folder {ParentFolderId} does not belong to bucket {BucketId}",
+                        request.FolderId, request.BucketId);
                     return Result.Error();
                 }
-
-                // Validar CompanyId
-                //if (folder.CompanyId != request.CompanyId)
-                //{
-                //    _logger.LogWarning("Folder {FolderId} does not belong to company {CompanyId}",
-                //        request.ParentFolder.Value, request.CompanyId);
-                //    return Result.Error();
-                //}
             }
 
             // Construir o path completo do arquivo
-            string folderPath = BuildFolderPath(folder);
+            string folderPath = await BuildFullPath(request.FolderId);
 
             // Gerar ID único para o arquivo
             var fileId = Guid.NewGuid();
@@ -91,12 +102,13 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
 
             // Fazer upload para S3
             var uploadResult = await _s3Service.UploadFileAsync(
-                request.BucketName,
+                bucket.BucketName,
                 s3Key,
                 request.File.OpenReadStream(),
                 request.File.ContentType,
                 request.IsPublic,
-                cancellationToken);
+                cancellationToken
+            );
 
             if (!uploadResult)
             {
@@ -108,7 +120,7 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
             string? publicUrl = null;
             if (request.IsPublic)
             {
-                publicUrl = await _s3Service.GetPublicUrlAsync(request.BucketName, s3Key);
+                publicUrl = await _s3Service.GetPublicUrlAsync(bucket.BucketName, s3Key);
                 _logger.LogInformation("Public URL generated for file: {PublicUrl}", publicUrl);
             }
 
@@ -119,14 +131,14 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
                 SK = "METADATA",
                 FileId = fileId,
                 FileName = request.File.FileName,
-                BucketName = request.BucketName,
+                BucketName = bucket.BucketName,
                 S3Key = s3Key,
                 ContentType = request.File.ContentType,
                 Size = request.File.Length,
+                FolderId = request.FolderId,
                 Folder = folderPath,
                 CompanyId = request.TenantId,
-                SubCompanyId = request.SubCompanyId,
-                UploadedBy = request.UploadedBy,
+                UploadedBy = userIdResult,
                 IsPublic = request.IsPublic,
                 PublicUrl = publicUrl,
                 CreatedAt = DateTime.UtcNow,
@@ -140,10 +152,8 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
                 fileId,
                 request.File.FileName,
                 request.IsPublic,
-                request.ParentFolder.HasValue
+                request.FolderId.ToString() ?? "Root"
                 );
-
-
 
             return Result.Success(new UploadFileResponse
             {
@@ -158,15 +168,19 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
         }
     }
 
-    private string BuildFolderPath(FolderDto? folder)
+    private async Task<string> BuildFullPath(Guid? parentFolderId)
     {
-        if (folder == null)
+        if (parentFolderId.HasValue)
         {
-            return string.Empty;
+            var parentFolder = await _folderRepository.GetByIdAsync(parentFolderId.Value);
+            if (parentFolder != null)
+            {
+                return string.IsNullOrEmpty(parentFolder.Path)
+                    ? parentFolder.FolderName
+                    : $"{parentFolder.Path}/{parentFolder.FolderName}";
+            }
         }
 
-        return string.IsNullOrEmpty(folder.Path)
-            ? folder.FolderName
-            : $"{folder.Path}/{folder.FolderName}";
+        return string.Empty;
     }
 }

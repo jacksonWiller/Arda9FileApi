@@ -1,5 +1,4 @@
 using Amazon.CognitoIdentityProvider.Model;
-using Arda9FileApi.Application.Extensions;
 using Arda9FileApi.Application.Services;
 using Ardalis.Result;
 using MediatR;
@@ -38,20 +37,20 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, Result<Re
         }
         catch (UsernameExistsException)
         {
-            return ResultError.Error("Este email já está em uso");
+            return Result.Error("Este email já está em uso");
         }
         catch (InvalidPasswordException ex)
         {
-            return ResultError.Error($"Senha inválida: {ex.Message}");
+            return Result.Error($"Senha inválida: {ex.Message}");
         }
         catch (InvalidParameterException ex)
         {
-            return ResultError.Error($"Parâmetros inválidos: {ex.Message}");
+            return Result.Error($"Parâmetros inválidos: {ex.Message}");
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Error registering user {Email}", request.Email);
-            return ResultError.Error("Erro ao registrar usuário");
+            return Result.Error("Erro ao registrar usuário");
         }
     }
 }

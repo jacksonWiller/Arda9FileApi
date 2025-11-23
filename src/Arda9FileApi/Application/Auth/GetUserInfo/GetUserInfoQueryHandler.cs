@@ -1,4 +1,3 @@
-using Arda9FileApi.Application.Extensions;
 using Arda9FileApi.Application.Services;
 using Ardalis.Result;
 using MediatR;
@@ -37,7 +36,7 @@ public class GetUserInfoQueryHandler : IRequestHandler<GetUserInfoQuery, Result<
         catch (Exception ex)
         {
             logger.LogError(ex, "Error getting user info");
-            return ResultError.Error("Erro ao obter informações do usuário");
+            return Result.Error("Erro ao obter informações do usuário");
         }
     }
 }

@@ -1,5 +1,4 @@
 using Amazon.CognitoIdentityProvider.Model;
-using Arda9FileApi.Application.Extensions;
 using Arda9FileApi.Application.Services;
 using Ardalis.Result;
 using MediatR;
@@ -41,7 +40,7 @@ public class ForgotPasswordCommandHandler : IRequestHandler<ForgotPasswordComman
         catch (Exception ex)
         {
             logger.LogError(ex, "Error sending password reset code to {Email}", request.Email);
-            return ResultError.Error("Erro ao enviar código de recuperação");
+            return Result.Error("Erro ao enviar código de recuperação");
         }
     }
 }

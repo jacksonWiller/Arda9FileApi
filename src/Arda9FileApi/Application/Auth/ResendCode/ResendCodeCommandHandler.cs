@@ -1,4 +1,3 @@
-using Arda9FileApi.Application.Extensions;
 using Arda9FileApi.Application.Services;
 using Ardalis.Result;
 using MediatR;
@@ -31,7 +30,7 @@ public class ResendCodeCommandHandler : IRequestHandler<ResendCodeCommand, Resul
         catch (Exception ex)
         {
             logger.LogError(ex, "Error resending confirmation code to {Email}", request.Email);
-            return ResultError.Error("Erro ao reenviar código");
+            return Result.Error("Erro ao reenviar código");
         }
     }
 }

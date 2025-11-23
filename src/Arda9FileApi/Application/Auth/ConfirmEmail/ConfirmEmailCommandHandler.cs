@@ -1,5 +1,4 @@
 using Amazon.CognitoIdentityProvider.Model;
-using Arda9FileApi.Application.Extensions;
 using Arda9FileApi.Application.Services;
 using Ardalis.Result;
 using MediatR;
@@ -31,16 +30,16 @@ public class ConfirmEmailCommandHandler : IRequestHandler<ConfirmEmailCommand, R
         }
         catch (CodeMismatchException)
         {
-            return ResultError.Error("Código de confirmação inválido");
+            return Result.Error("Código de confirmação inválido");
         }
         catch (ExpiredCodeException)
         {
-            return ResultError.Error("Código de confirmação expirado");
+            return Result.Error("Código de confirmação expirado");
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Error confirming email for user {Email}", request.Email);
-            return ResultError.Error("Erro ao confirmar email");
+            return Result.Error("Erro ao confirmar email");
         }
     }
 }

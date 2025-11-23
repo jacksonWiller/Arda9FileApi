@@ -1,7 +1,5 @@
 using Amazon.S3;
 using Amazon.S3.Model;
-using Amazon.S3Control;
-using Amazon.S3Control.Model;
 using System.Text.Json;
 
 namespace Arda9FileApi.Infrastructure.Services;
@@ -9,20 +7,15 @@ namespace Arda9FileApi.Infrastructure.Services;
 public class S3Service : IS3Service
 {
     private readonly IAmazonS3 _s3Client;
-    private readonly IAmazonS3Control _s3ControlClient;
     private readonly ILogger<S3Service> _logger;
-    private readonly string _accountId;
 
     public S3Service(
         IAmazonS3 s3Client,
-        IAmazonS3Control s3ControlClient,
-        ILogger<S3Service> logger,
-        IConfiguration configuration)
+        ILogger<S3Service> logger
+        )
     {
         _s3Client = s3Client;
-        _s3ControlClient = s3ControlClient;
         _logger = logger;
-        _accountId = configuration["AWS:AccountId"] ?? throw new InvalidOperationException("AWS AccountId não configurado");
     }
 
     public async Task<bool> CreatePublicBucketAsync(string bucketName, CancellationToken cancellationToken = default)

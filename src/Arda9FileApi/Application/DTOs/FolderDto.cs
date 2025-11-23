@@ -8,7 +8,7 @@ namespace Arda9FileApi.Application.DTOs;
 /// GSI1: BUCKET#{BucketId} -> Lista pastas por bucket
 /// GSI3: COMPANY#{CompanyId} -> Lista pastas por empresa
 /// </summary>
-[DynamoDBTable("arda9-file-v2")]
+[DynamoDBTable("arda9-file-v3")]
 public class FolderDto : DynamoSingleTableEntity
 {
     [DynamoDBIgnore]

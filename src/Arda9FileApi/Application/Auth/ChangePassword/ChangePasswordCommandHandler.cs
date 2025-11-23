@@ -1,5 +1,4 @@
 using Amazon.CognitoIdentityProvider.Model;
-using Arda9FileApi.Application.Extensions;
 using Arda9FileApi.Application.Services;
 using Ardalis.Result;
 using MediatR;
@@ -31,16 +30,16 @@ public class ChangePasswordCommandHandler : IRequestHandler<ChangePasswordComman
         }
         catch (NotAuthorizedException)
         {
-            return ResultError.Error("Senha atual incorreta");
+            return Result.Error("Senha atual incorreta");
         }
         catch (InvalidPasswordException ex)
         {
-            return ResultError.Error($"Nova senha inválida: {ex.Message}");
+            return Result.Error($"Nova senha inválida: {ex.Message}");
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Error changing password");
-            return ResultError.Error("Erro ao alterar senha");
+            return Result.Error("Erro ao alterar senha");
         }
     }
 }

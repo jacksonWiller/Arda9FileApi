@@ -37,18 +37,25 @@ public class FolderRepository : IFolderRepository
     {
         try
         {
-            var conditions = new List<ScanCondition>
-            {
-                new ScanCondition("BucketId", ScanOperator.Equal, bucketId),
-                new ScanCondition("Path", ScanOperator.Equal, path),
-                new ScanCondition("FolderName", ScanOperator.Equal, folderName),
-                new ScanCondition("IsDeleted", ScanOperator.Equal, false),
-                new ScanCondition("EntityType", ScanOperator.Equal, "FOLDER")
-            };
+            // Use GSI1 to query folders by bucket, then filter in memory
+            // This is more efficient than a scan and avoids Guid serialization issues
+            var search = _context.QueryAsync<FolderDto>(
+                $"BUCKET#{bucketId}",
+                new DynamoDBOperationConfig
+                {
+                    IndexName = "GSI1-Index"
+                }
+            );
 
-            var search = _context.ScanAsync<FolderDto>(conditions);
-            var results = await search.GetNextSetAsync();
-            return results.FirstOrDefault();
+            var allFoldersInBucket = await search.GetRemainingAsync();
+            
+            // Filter in memory for the specific path and folder name
+            return allFoldersInBucket
+                .FirstOrDefault(f => 
+                    f.EntityType == "FOLDER" &&
+                    !f.IsDeleted &&
+                    f.Path == path &&
+                    f.FolderName == folderName);
         }
         catch (Exception ex)
         {
@@ -84,15 +91,33 @@ public class FolderRepository : IFolderRepository
     {
         try
         {
-            var conditions = new List<ScanCondition>
+            // First get the parent folder to find the bucket
+            var parentFolder = await GetByIdAsync(parentFolderId);
+            if (parentFolder == null)
             {
-                new ScanCondition("ParentFolderId", ScanOperator.Equal, parentFolderId),
-                new ScanCondition("IsDeleted", ScanOperator.Equal, false),
-                new ScanCondition("EntityType", ScanOperator.Equal, "FOLDER")
-            };
+                _logger.LogWarning("Parent folder {ParentFolderId} not found", parentFolderId);
+                return new List<FolderDto>();
+            }
 
-            var search = _context.ScanAsync<FolderDto>(conditions);
-            return await search.GetRemainingAsync();
+            // Use GSI1 to query all folders in the same bucket, then filter in memory
+            // This avoids Guid serialization issues with scan conditions
+            var search = _context.QueryAsync<FolderDto>(
+                $"BUCKET#{parentFolder.BucketId}",
+                new DynamoDBOperationConfig
+                {
+                    IndexName = "GSI1-Index"
+                }
+            );
+
+            var allFoldersInBucket = await search.GetRemainingAsync();
+            
+            // Filter in memory for folders with this parent
+            return allFoldersInBucket
+                .Where(f => 
+                    f.EntityType == "FOLDER" &&
+                    !f.IsDeleted &&
+                    f.ParentFolderId == parentFolderId)
+                .ToList();
         }
         catch (Exception ex)
         {

@@ -1,5 +1,4 @@
 using Amazon.CognitoIdentityProvider.Model;
-using Arda9FileApi.Application.Extensions;
 using Arda9FileApi.Application.Services;
 using Ardalis.Result;
 using MediatR;
@@ -34,12 +33,12 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, R
         }
         catch (NotAuthorizedException)
         {
-            return ResultError.Error("Refresh token inválido ou expirado");
+            return Result.Error("Refresh token inválido ou expirado");
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Error refreshing token");
-            return ResultError.Error("Erro ao renovar token");
+            return Result.Error("Erro ao renovar token");
         }
     }
 }

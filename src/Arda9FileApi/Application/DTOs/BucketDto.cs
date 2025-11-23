@@ -7,7 +7,7 @@ namespace Arda9FileApi.Application.DTOs;
 /// PK: BUCKET#{BucketId}, SK: METADATA
 /// GSI3: COMPANY#{CompanyId} -> Lista buckets por empresa
 /// </summary>
-[DynamoDBTable("arda9-file-v2")]
+[DynamoDBTable("arda9-file-v3")]
 public class BucketDto : DynamoSingleTableEntity
 {
     [DynamoDBIgnore]

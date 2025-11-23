@@ -1,5 +1,4 @@
 using Amazon.CognitoIdentityProvider.Model;
-using Arda9FileApi.Application.Extensions;
 using Arda9FileApi.Application.Services;
 using Ardalis.Result;
 using MediatR;
@@ -31,20 +30,20 @@ public class ResetPasswordCommandHandler : IRequestHandler<ResetPasswordCommand,
         }
         catch (CodeMismatchException)
         {
-            return ResultError.Error("Código de confirmação inválido");
+            return Result.Error("Código de confirmação inválido");
         }
         catch (ExpiredCodeException)
         {
-            return ResultError.Error("Código de confirmação expirado");
+            return Result.Error("Código de confirmação expirado");
         }
         catch (InvalidPasswordException ex)
         {
-            return ResultError.Error($"Senha inválida: {ex.Message}");
+            return Result.Error($"Senha inválida: {ex.Message}");
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Error resetting password for {Email}", request.Email);
-            return ResultError.Error("Erro ao redefinir senha");
+            return Result.Error("Erro ao redefinir senha");
         }
     }
 }

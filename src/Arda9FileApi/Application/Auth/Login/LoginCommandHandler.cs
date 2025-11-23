@@ -1,5 +1,4 @@
 using Amazon.CognitoIdentityProvider.Model;
-using Arda9FileApi.Application.Extensions;
 using Arda9FileApi.Application.Services;
 using Ardalis.Result;
 using MediatR;
@@ -40,20 +39,20 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, Result<LoginRes
         }
         catch (NotAuthorizedException)
         {
-            return ResultError.Error("Email ou senha incorretos");
+            return Result.Error("Email ou senha incorretos");
         }
         catch (UserNotConfirmedException)
         {
-            return ResultError.Error("Usuário não confirmado. Verifique seu email.");
+            return Result.Error("Usuário não confirmado. Verifique seu email.");
         }
         catch (InvalidParameterException ex)
         {
-            return ResultError.Error($"Parâmetros inválidos: {ex.Message}");
+            return Result.Error($"Parâmetros inválidos: {ex.Message}");
         }
         catch (Exception ex)
         {
             logger.LogError(ex, "Error logging in user {Email}", request.Email);
-            return ResultError.Error("Erro ao realizar login");
+            return Result.Error("Erro ao realizar login");
         }
     }
 }
