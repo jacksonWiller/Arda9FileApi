@@ -120,12 +120,12 @@ public class FilesController : ControllerBase
     /// <summary>
     /// Obtém todos os arquivos de um bucket
     /// </summary>
-    [HttpGet("{tenantId}/bucket/{bucketName}")]
+    [HttpGet("{tenantId}/bucket/{bucketId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetFilesByBucket(Guid tenantId, string bucketName)
+    public async Task<IActionResult> GetFilesByBucket(Guid tenantId, Guid BucketId)
     {
-        var query = new GetFilesByBucketQuery { TenantId = tenantId, BucketName = bucketName };
+        var query = new GetFilesByBucketQuery { TenantId = tenantId, BucketId = BucketId };
         var result = await _mediator.Send(query);
         return result.ToActionResult();
     }
