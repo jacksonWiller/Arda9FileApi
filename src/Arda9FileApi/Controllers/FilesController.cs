@@ -1,13 +1,9 @@
-using Arda9FileApi.Api.Extensions;
-using Arda9FileApi.Application.Files.Commands.UploadFile;
-using Arda9FileApi.Application.Files.Commands.UpdateFile;
 using Arda9FileApi.Application.Files.Commands.DeleteFile;
 using Arda9FileApi.Application.Files.Commands.RestoreFile;
-using Arda9FileApi.Application.Files.Commands.DuplicateFile;
-using Arda9FileApi.Application.Files.Commands.MoveFile;
 using Arda9FileApi.Application.Files.Queries.GetFileById;
 using Arda9FileApi.Application.Files.Queries.GetFilesByBucket;
 using Arda9FileApi.Application.Files.Queries.GetFilesByFolder;
+using Arda9FileApi.Application.Files.Queries.GetRootFiles;
 using Arda9FileApi.Application.Files.Queries.DownloadFile;
 using Arda9FileApi.Application.Files.Queries.GetFiles;
 using Arda9FileApi.Application.Files.Queries.GetFileDownloadUrl;
@@ -15,6 +11,11 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
+using Arda9FileApi.Core.Api.Extensions;
+using Arda9FileApi.Application.Features.Files.Commands.DuplicateFile;
+using Arda9FileApi.Application.Features.Files.Commands.MoveFile;
+using Arda9FileApi.Application.Features.Files.Commands.UpdateFile;
+using Arda9FileApi.Application.Features.Files.Commands.UploadFile;
 
 namespace Arda9FileApi.Controllers;
 
@@ -123,9 +124,24 @@ public class FilesController : ControllerBase
     [HttpGet("{tenantId}/bucket/{bucketId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetFilesByBucket(Guid tenantId, Guid BucketId)
+    public async Task<IActionResult> GetFilesByBucket(Guid tenantId, Guid bucketId)
     {
-        var query = new GetFilesByBucketQuery { TenantId = tenantId, BucketId = BucketId };
+        var query = new GetFilesByBucketQuery { TenantId = tenantId, BucketId = bucketId };
+        var result = await _mediator.Send(query);
+        return result.ToActionResult();
+    }
+
+    /// <summary>
+    /// Obtém todos os arquivos da pasta raiz (sem pasta pai)
+    /// </summary>
+    [HttpGet("{tenantId}/bucket/{bucketId}/root")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> GetRootFiles(Guid tenantId, Guid bucketId)
+    {
+        var query = new GetRootFilesQuery { TenantId = tenantId, BucketId = bucketId };
         var result = await _mediator.Send(query);
         return result.ToActionResult();
     }

@@ -1,7 +1,7 @@
 using Amazon.CognitoIdentityProvider;
 using Amazon.CognitoIdentityProvider.Model;
 using Arda9FileApi.Application.Auth.GetUserInfo;
-using Arda9FileApi.Configuration;
+using Arda9FileApi.Core.Configuration;
 using Ardalis.Result;
 using Microsoft.Extensions.Options;
 using System.Security.Claims;
