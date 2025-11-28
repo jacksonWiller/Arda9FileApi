@@ -1,12 +1,3 @@
-using Arda9FileApi.Application.Files.Commands.DeleteFile;
-using Arda9FileApi.Application.Files.Commands.RestoreFile;
-using Arda9FileApi.Application.Files.Queries.GetFileById;
-using Arda9FileApi.Application.Files.Queries.GetFilesByBucket;
-using Arda9FileApi.Application.Files.Queries.GetFilesByFolder;
-using Arda9FileApi.Application.Files.Queries.GetRootFiles;
-using Arda9FileApi.Application.Files.Queries.DownloadFile;
-using Arda9FileApi.Application.Files.Queries.GetFiles;
-using Arda9FileApi.Application.Files.Queries.GetFileDownloadUrl;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,6 +7,15 @@ using Arda9FileApi.Application.Features.Files.Commands.DuplicateFile;
 using Arda9FileApi.Application.Features.Files.Commands.MoveFile;
 using Arda9FileApi.Application.Features.Files.Commands.UpdateFile;
 using Arda9FileApi.Application.Features.Files.Commands.UploadFile;
+using Arda9FileApi.Application.Features.Files.Queries.GetFiles;
+using Arda9FileApi.Application.Features.Files.Queries.GetFileById;
+using Arda9FileApi.Application.Features.Files.Queries.GetFilesByBucket;
+using Arda9FileApi.Application.Features.Files.Queries.GetRootFiles;
+using Arda9FileApi.Application.Features.Files.Queries.GetFilesByFolder;
+using Arda9FileApi.Application.Features.Files.Queries.DownloadFile;
+using Arda9FileApi.Application.Features.Files.Queries.GetFileDownloadUrl;
+using Arda9FileApi.Application.Features.Files.Commands.DeleteFile;
+using Arda9FileApi.Application.Features.Files.Commands.RestoreFile;
 
 namespace Arda9FileApi.Controllers;
 

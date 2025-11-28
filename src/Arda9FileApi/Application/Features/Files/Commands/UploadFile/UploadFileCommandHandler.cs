@@ -1,7 +1,7 @@
 using Amazon.S3;
-using Arda9FileApi.Application.DTOs;
 using Arda9FileApi.Application.Features.Buckets.Commands.CreateBucket;
 using Arda9FileApi.Application.Services;
+using Arda9FileApi.Models;
 using Arda9FileApi.Repositories;
 using Ardalis.Result;
 using FluentValidation;
@@ -124,7 +124,7 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
             }
 
             // Criar metadados do arquivo
-            var fileMetadata = new FileMetadataDto
+            var fileMetadata = new FileMetadataModel
             {
                 PK = $"FILE#{fileId}",
                 SK = "METADATA",

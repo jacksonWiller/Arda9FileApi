@@ -1,4 +1,3 @@
-using Arda9FileApi.Application.DTOs;
 using Arda9FileApi.Application.Services;
 using Arda9FileApi.Repositories;
 using Ardalis.Result;
@@ -14,19 +13,16 @@ public class CreateBucketHandler : IRequestHandler<CreateBucketCommand, Result<C
     private readonly IBucketRepository _bucketRepository;
     private readonly IValidator<CreateBucketCommand> _validator;
     private readonly ILogger<CreateBucketHandler> _logger;
-    private readonly IAuthService _authService;
 
     public CreateBucketHandler(
         IS3Service s3Service,
         IBucketRepository bucketRepository,
         IValidator<CreateBucketCommand> validator,
-        IAuthService authService,
         ILogger<CreateBucketHandler> logger)
     {
         _s3Service = s3Service;
         _bucketRepository = bucketRepository;
         _validator = validator;
-        _authService = authService;
         _logger = logger;
     }
 

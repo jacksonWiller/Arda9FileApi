@@ -138,14 +138,12 @@ builder.Services
 
 // Registrar Repositories
 builder.Services
-    .AddScoped<IUserRepository, UserRepository>()
     .AddScoped<IBucketRepository, BucketRepository>()
     .AddScoped<IFileRepository, FileRepository>()
     .AddScoped<IFolderRepository, FolderRepository>();
 
 // Registrar Services
 builder.Services
-    .AddScoped<IAuthService, AuthService>()
     .AddScoped<IS3Service, S3Service>();
 
 // Add AWS Lambda support
