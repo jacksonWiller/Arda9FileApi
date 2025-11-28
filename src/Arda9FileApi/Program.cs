@@ -91,10 +91,11 @@ builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new() { 
-        Title = "Arda9 File API", 
+    c.SwaggerDoc("v1", new()
+    {
+        Title = "Arda9 File API",
         Version = "v1",
-        Description = "API para gerenciamento de usuários, autenticação e buckets usando AWS Lambda, DynamoDB, Cognito e S3"
+        Description = "API para gerenciamento de arquivos, pastas e buckets S3 usando AWS Lambda, DynamoDB, Cognito e S3 com autenticação JWT multi-tenant"
     });
 
     // Configuração para autenticação JWT no Swagger
