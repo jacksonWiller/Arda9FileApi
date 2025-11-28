@@ -43,7 +43,7 @@ public class BucketModel : DynamoSingleTableEntity
     public DateTime UpdatedAt { get; set; }
 
     [DynamoDBProperty]
-    public Guid? CreatedBy { get; set; }
+    public string? CreatedBy { get; set; }
 
     [DynamoDBProperty]
     public Guid? UpdatedBy { get; set; }

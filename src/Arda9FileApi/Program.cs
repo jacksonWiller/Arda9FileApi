@@ -5,10 +5,10 @@ using Amazon.DynamoDBv2.DataModel;
 using Amazon.S3;
 using Amazon.S3Control;
 using Amazon.SecretsManager;
-using Arda9FileApi.Application.Services;
 using Arda9FileApi.Core.Application.Behaviors;
 using Arda9FileApi.Core.Configuration;
 using Arda9FileApi.Repositories;
+using Arda9FileApi.Services;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -141,6 +141,17 @@ builder.Services
     .AddScoped<IBucketRepository, BucketRepository>()
     .AddScoped<IFileRepository, FileRepository>()
     .AddScoped<IFolderRepository, FolderRepository>();
+
+// Configurar HttpClient para AuthService
+builder.Services.AddHttpClient<IAuthService, AuthService>(client =>
+{
+    var authApiBaseUrl = builder.Configuration["UserApi:BaseUrl"] 
+        ?? throw new InvalidOperationException("UserApi:BaseUrl não configurado");
+    
+    client.BaseAddress = new Uri(authApiBaseUrl);
+    client.Timeout = TimeSpan.FromSeconds(30);
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+});
 
 // Registrar Services
 builder.Services
