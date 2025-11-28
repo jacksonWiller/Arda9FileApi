@@ -142,12 +142,7 @@ public class GetFilesQueryHandler : IRequestHandler<GetFilesQuery, Result<GetFil
                 Description = null,
                 CreatedAt = f.CreatedAt,
                 UpdatedAt = f.UpdatedAt,
-                CreatedBy = f.UploadedBy.HasValue ? new CreatedByInfo
-                {
-                    Id = f.UploadedBy.Value,
-                    Name = "User",
-                    Avatar = null
-                } : null
+                CreatedBy = f.UploadedBy
             }).ToList();
 
             var response = new GetFilesResponse

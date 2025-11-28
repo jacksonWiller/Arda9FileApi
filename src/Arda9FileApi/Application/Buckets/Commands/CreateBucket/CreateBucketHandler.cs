@@ -12,21 +12,21 @@ public class CreateBucketHandler : IRequestHandler<CreateBucketCommand, Result<C
 {
     private readonly IS3Service _s3Service;
     private readonly IBucketRepository _bucketRepository;
+    private readonly ICurrentUserService _currentUserService;
     private readonly IValidator<CreateBucketCommand> _validator;
-    private readonly IAuthService _authService;
     private readonly ILogger<CreateBucketHandler> _logger;
 
     public CreateBucketHandler(
         IS3Service s3Service,
         IBucketRepository bucketRepository,
+        ICurrentUserService currentUserService,
         IValidator<CreateBucketCommand> validator,
-        IAuthService authService,
         ILogger<CreateBucketHandler> logger)
     {
         _s3Service = s3Service;
         _bucketRepository = bucketRepository;
+        _currentUserService = currentUserService;
         _validator = validator;
-        _authService = authService;
         _logger = logger;
     }
 
@@ -41,17 +41,26 @@ public class CreateBucketHandler : IRequestHandler<CreateBucketCommand, Result<C
                 return Result<CreateBucketResponse>.Invalid(validationResult.AsErrors());
             }
 
-            // Obter ID do usuário autenticado
-            var userIdResult = await _authService.GetCurrentUserAsync();
-            if (userIdResult != null)
+            // Extrair TenantId e UserId do token JWT
+            var tenantId = _currentUserService.GetTenantId();
+            if (tenantId == Guid.Empty)
             {
-                return Result<CreateBucketResponse>.Unauthorized();
+                _logger.LogWarning("TenantId not found in token");
+                return Result<CreateBucketResponse>.Forbidden();
+            }
+
+            var userId = _currentUserService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("UserId not found in token");
+                return Result<CreateBucketResponse>.Forbidden();
             }
 
             // Verificar se bucket já existe
             var existingBucket = await _bucketRepository.GetByBucketNameAsync(request.BucketName);
             if (existingBucket != null)
             {
+                _logger.LogWarning("Bucket {BucketName} already exists in database", request.BucketName);
                 return Result<CreateBucketResponse>.Error();
             }
 
@@ -59,6 +68,7 @@ public class CreateBucketHandler : IRequestHandler<CreateBucketCommand, Result<C
             var bucketExists = await _s3Service.BucketExistsAsync(request.BucketName, cancellationToken);
             if (bucketExists)
             {
+                _logger.LogWarning("Bucket {BucketName} already exists in S3", request.BucketName);
                 return Result<CreateBucketResponse>.Error();
             }
 
@@ -75,6 +85,7 @@ public class CreateBucketHandler : IRequestHandler<CreateBucketCommand, Result<C
 
             if (!bucketCreated)
             {
+                _logger.LogError("Failed to create bucket {BucketName} in S3", request.BucketName);
                 return Result<CreateBucketResponse>.Error();
             }
 
@@ -83,18 +94,18 @@ public class CreateBucketHandler : IRequestHandler<CreateBucketCommand, Result<C
             {
                 Id = Guid.NewGuid(),
                 BucketName = request.BucketName,
-                CompanyId = request.TenantId,
+                CompanyId = tenantId,
                 Region = "us-east-1",
                 Status = "Active",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
-                CreatedBy = userIdResult.Sub
+                CreatedBy = userId
             };
 
             await _bucketRepository.CreateAsync(bucketDto);
 
             _logger.LogInformation("Bucket {BucketName} criado com sucesso pelo usuário {UserId} (Público: {IsPublic})", 
-                request.BucketName, userIdResult.Sub, request.IsPublic);
+                request.BucketName, userId, request.IsPublic);
 
             return Result<CreateBucketResponse>.Success(new CreateBucketResponse
             {

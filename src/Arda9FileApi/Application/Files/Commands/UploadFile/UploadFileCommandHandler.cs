@@ -18,7 +18,7 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
     private readonly IAmazonS3 _s3Client;
     private readonly ILogger<UploadFileCommandHandler> _logger;
     private readonly IValidator<CreateBucketCommand> _validator;
-    private readonly IAuthService _authService;
+    private readonly ICurrentUserService _currentUserService;
 
     public UploadFileCommandHandler(
         IFileRepository fileRepository,
@@ -28,7 +28,7 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
         IAmazonS3 s3Client,
         ILogger<UploadFileCommandHandler> logger,
         IValidator<CreateBucketCommand> validator,
-        IAuthService authService
+        ICurrentUserService currentUserService
         )
     {
         _fileRepository = fileRepository;
@@ -38,7 +38,7 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
         _s3Client = s3Client;
         _validator = validator;
         _logger = logger;
-        _authService = authService;
+        _currentUserService = currentUserService;
     }
 
     public async Task<Result<UploadFileResponse>> Handle(UploadFileCommand request, CancellationToken cancellationToken)
@@ -46,10 +46,11 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
         try
         {
             // Obter ID do usuário autenticado
-            var userIdResult = await _authService.GetCurrentUserAsync();
-            if (userIdResult != null)
+            var userId = _currentUserService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
             {
-                return Result.Unauthorized();
+                _logger.LogWarning("UserId not found in token");
+                return Result.Forbidden();
             }
 
             // Verificar se o bucket existe
@@ -137,7 +138,7 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
                 FolderId = request.FolderId,
                 Folder = folderPath,
                 CompanyId = request.TenantId,
-                UploadedBy = Guid.Parse(userIdResult.Sub), 
+                UploadedBy = userId, 
                 IsPublic = request.IsPublic,
                 PublicUrl = publicUrl,
                 CreatedAt = DateTime.UtcNow,

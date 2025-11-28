@@ -54,7 +54,7 @@ public class FileMetadataModel : DynamoSingleTableEntity
     public Guid? SubCompanyId { get; set; }
 
     [DynamoDBProperty("UploadedBy")]
-    public Guid? UploadedBy { get; set; }
+    public string? UploadedBy { get; set; }
 
     [DynamoDBProperty("IsPublic")]
     public bool IsPublic { get; set; }

@@ -27,14 +27,7 @@ public class FileDetailDto
     public string? Description { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
-    public CreatedByInfo? CreatedBy { get; set; }
-}
-
-public class CreatedByInfo
-{
-    public Guid Id { get; set; }
-    public string Name { get; set; } = string.Empty;
-    public string? Avatar { get; set; }
+    public string? CreatedBy { get; set; }
 }
 
 public class FilesSummary

@@ -142,20 +142,10 @@ builder.Services
     .AddScoped<IFileRepository, FileRepository>()
     .AddScoped<IFolderRepository, FolderRepository>();
 
-// Configurar HttpClient para AuthService
-builder.Services.AddHttpClient<IAuthService, AuthService>(client =>
-{
-    var authApiBaseUrl = builder.Configuration["UserApi:BaseUrl"] 
-        ?? throw new InvalidOperationException("UserApi:BaseUrl não configurado");
-    
-    client.BaseAddress = new Uri(authApiBaseUrl);
-    client.Timeout = TimeSpan.FromSeconds(30);
-    client.DefaultRequestHeaders.Add("Accept", "application/json");
-});
-
 // Registrar Services
 builder.Services
-    .AddScoped<IS3Service, S3Service>();
+    .AddScoped<IS3Service, S3Service>()
+    .AddScoped<ICurrentUserService, CurrentUserService>();
 
 // Add AWS Lambda support
 builder.Services.AddAWSLambdaHosting(LambdaEventSource.HttpApi);

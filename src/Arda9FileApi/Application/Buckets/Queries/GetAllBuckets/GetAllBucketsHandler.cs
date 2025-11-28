@@ -28,22 +28,11 @@ public class GetAllBucketsHandler : IRequestHandler<GetAllBucketsQuery, Result<G
     {
         try
         {
-            // Extrair TenantId do token JWT
-            var tenantId = GetTenantIdFromToken();
-            if (tenantId == Guid.Empty)
-            {
-                _logger.LogWarning("TenantId not found in token");
-                return Result<GetAllBucketsResponse>.Forbidden();
-            }
-
             // Buscar todos os buckets do S3
             var s3Response = await _s3Client.ListBucketsAsync(cancellationToken);
 
-            // Buscar metadados do DynamoDB filtrados por CompanyId
+            // Buscar metadados do DynamoDB
             var dynamoBuckets = await _bucketRepository.GetAllAsync();
-            
-            // Filtrar apenas buckets da empresa do usuário
-            dynamoBuckets = dynamoBuckets.Where(b => b.CompanyId == tenantId).ToList();
 
             // Criar um dicionário para lookup rápido
             var dynamoBucketsDict = dynamoBuckets.ToDictionary(b => b.BucketName, b => b);
@@ -60,7 +49,7 @@ public class GetAllBucketsHandler : IRequestHandler<GetAllBucketsQuery, Result<G
                 })
                 .ToList();
 
-            _logger.LogInformation("Retrieved {Count} buckets for tenant {TenantId}", buckets.Count, tenantId);
+            _logger.LogInformation("Retrieved {Count} buckets matching both S3 and DynamoDB", buckets.Count);
 
             return Result<GetAllBucketsResponse>.Success(new GetAllBucketsResponse
             {
