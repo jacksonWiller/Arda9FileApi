@@ -1,11 +1,11 @@
 using Ardalis.Result;
-using Arda9FileApi.Application.DTOs;
-using Arda9FileApi.Infrastructure.Repositories;
 using MediatR;
+using Arda9FileApi.Repositories;
+using Arda9FileApi.Models;
 
 namespace Arda9FileApi.Application.Folders.Queries.GetFoldersByParent;
 
-public class GetFoldersByParentQueryHandler : IRequestHandler<GetFoldersByParentQuery, Result<List<FolderDto>>>
+public class GetFoldersByParentQueryHandler : IRequestHandler<GetFoldersByParentQuery, Result<List<FolderModel>>>
 {
     private readonly IFolderRepository _repository;
     private readonly ILogger<GetFoldersByParentQueryHandler> _logger;
@@ -18,7 +18,7 @@ public class GetFoldersByParentQueryHandler : IRequestHandler<GetFoldersByParent
         _logger = logger;
     }
 
-    public async Task<Result<List<FolderDto>>> Handle(GetFoldersByParentQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<FolderModel>>> Handle(GetFoldersByParentQuery request, CancellationToken cancellationToken)
     {
         try
         {
@@ -26,25 +26,25 @@ public class GetFoldersByParentQueryHandler : IRequestHandler<GetFoldersByParent
             if (parentFolder == null || parentFolder.IsDeleted)
             {
                 _logger.LogWarning("Parent folder {ParentFolderId} not found", request.ParentFolderId);
-                return Result<List<FolderDto>>.NotFound();
+                return Result<List<FolderModel>>.NotFound();
             }
 
             if (parentFolder.CompanyId != request.TenantId)
             {
                 _logger.LogWarning("Parent folder {ParentFolderId} does not belong to tenant {TenantId}", 
                     request.ParentFolderId, request.TenantId);
-                return Result<List<FolderDto>>.Forbidden();
+                return Result<List<FolderModel>>.Forbidden();
             }
 
             var folders = await _repository.GetByParentFolderIdAsync(request.ParentFolderId);
             var activeFolders = folders.Where(f => !f.IsDeleted).ToList();
 
-            return Result<List<FolderDto>>.Success(activeFolders);
+            return Result<List<FolderModel>>.Success(activeFolders);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving subfolders for parent {ParentFolderId}", request.ParentFolderId);
-            return Result<List<FolderDto>>.Error();
+            return Result<List<FolderModel>>.Error();
         }
     }
 }

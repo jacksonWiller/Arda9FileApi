@@ -5,11 +5,10 @@ using Amazon.DynamoDBv2.DataModel;
 using Amazon.S3;
 using Amazon.S3Control;
 using Amazon.SecretsManager;
-using Arda9FileApi.Application.Services;
-using Arda9FileApi.Configuration;
-using Arda9FileApi.Core.Behaviors;
-using Arda9FileApi.Infrastructure.Repositories;
-using Arda9FileApi.Infrastructure.Services;
+using Arda9FileApi.Core.Application.Behaviors;
+using Arda9FileApi.Core.Configuration;
+using Arda9FileApi.Repositories;
+using Arda9FileApi.Services;
 using FluentValidation;
 using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -27,6 +26,17 @@ builder.Services.AddHttpContextAccessor();
 builder.Logging
         .ClearProviders()
         .AddJsonConsole();
+
+// Configurar CORS
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 // Configurar as opções do AWS Cognito
 builder.Services.Configure<AwsCognitoConfig>(
@@ -81,10 +91,11 @@ builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new() { 
-        Title = "Arda9 File API", 
+    c.SwaggerDoc("v1", new()
+    {
+        Title = "Arda9 File API",
         Version = "v1",
-        Description = "API para gerenciamento de usuários, autenticação e buckets usando AWS Lambda, DynamoDB, Cognito e S3"
+        Description = "API para gerenciamento de arquivos, pastas e buckets S3 usando AWS Lambda, DynamoDB, Cognito e S3 com autenticação JWT multi-tenant"
     });
 
     // Configuração para autenticação JWT no Swagger
@@ -128,15 +139,14 @@ builder.Services
 
 // Registrar Repositories
 builder.Services
-    .AddScoped<IUserRepository, UserRepository>()
     .AddScoped<IBucketRepository, BucketRepository>()
     .AddScoped<IFileRepository, FileRepository>()
     .AddScoped<IFolderRepository, FolderRepository>();
 
 // Registrar Services
 builder.Services
-    .AddScoped<IAuthService, AuthService>()
-    .AddScoped<IS3Service, S3Service>();
+    .AddScoped<IS3Service, S3Service>()
+    .AddScoped<ICurrentUserService, CurrentUserService>();
 
 // Add AWS Lambda support
 builder.Services.AddAWSLambdaHosting(LambdaEventSource.HttpApi);
@@ -149,6 +159,9 @@ app.UseSwaggerUI(c =>
     c.SwaggerEndpoint("/swagger/v1/swagger.json", "Arda9 File API v1");
     c.RoutePrefix = string.Empty; // Define o Swagger como página inicial
 });
+
+// Habilitar CORS
+app.UseCors();
 
 app.UseHttpsRedirection();
 

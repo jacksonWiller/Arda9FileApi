@@ -1,11 +1,11 @@
 using Ardalis.Result;
-using Arda9FileApi.Application.DTOs;
-using Arda9FileApi.Infrastructure.Repositories;
 using MediatR;
+using Arda9FileApi.Repositories;
+using Arda9FileApi.Models;
 
 namespace Arda9FileApi.Application.Folders.Queries.GetFolderById;
 
-public class GetFolderByIdQueryHandler : IRequestHandler<GetFolderByIdQuery, Result<FolderDto>>
+public class GetFolderByIdQueryHandler : IRequestHandler<GetFolderByIdQuery, Result<FolderModel>>
 {
     private readonly IFolderRepository _repository;
     private readonly ILogger<GetFolderByIdQueryHandler> _logger;
@@ -18,7 +18,7 @@ public class GetFolderByIdQueryHandler : IRequestHandler<GetFolderByIdQuery, Res
         _logger = logger;
     }
 
-    public async Task<Result<FolderDto>> Handle(GetFolderByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<FolderModel>> Handle(GetFolderByIdQuery request, CancellationToken cancellationToken)
     {
         try
         {
@@ -27,22 +27,22 @@ public class GetFolderByIdQueryHandler : IRequestHandler<GetFolderByIdQuery, Res
             if (folder == null || folder.IsDeleted)
             {
                 _logger.LogWarning("Folder {FolderId} not found", request.FolderId);
-                return Result<FolderDto>.NotFound();
+                return Result<FolderModel>.NotFound();
             }
 
             if (folder.CompanyId != request.TenantId)
             {
                 _logger.LogWarning("Folder {FolderId} does not belong to tenant {TenantId}", 
                     request.FolderId, request.TenantId);
-                return Result<FolderDto>.Forbidden();
+                return Result<FolderModel>.Forbidden();
             }
 
-            return Result<FolderDto>.Success(folder);
+            return Result<FolderModel>.Success(folder);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving folder {FolderId}", request.FolderId);
-            return Result<FolderDto>.Error();
+            return Result<FolderModel>.Error();
         }
     }
 }

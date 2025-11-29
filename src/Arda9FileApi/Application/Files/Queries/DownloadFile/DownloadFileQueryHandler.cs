@@ -1,7 +1,7 @@
 using Ardalis.Result;
-using Arda9FileApi.Infrastructure.Repositories;
-using Arda9FileApi.Infrastructure.Services;
 using MediatR;
+using Arda9FileApi.Repositories;
+using Arda9FileApi.Services;
 
 namespace Arda9FileApi.Application.Files.Queries.DownloadFile;
 

@@ -1,9 +1,9 @@
-using Arda9FileApi.Application.DTOs;
+using Arda9FileApi.Models;
 
 namespace Arda9FileApi.Application.Files.Commands.UploadFile;
 
 public class UploadFileResponse
 {
-    public FileMetadataDto? FileMetadata { get; set; }
+    public FileMetadataModel? FileMetadata { get; set; }
     public string Message { get; set; } = string.Empty;
 }

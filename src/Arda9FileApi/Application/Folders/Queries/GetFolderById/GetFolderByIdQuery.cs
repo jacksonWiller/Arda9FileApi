@@ -1,10 +1,10 @@
 using Ardalis.Result;
-using Arda9FileApi.Application.DTOs;
 using MediatR;
+using Arda9FileApi.Models;
 
 namespace Arda9FileApi.Application.Folders.Queries.GetFolderById;
 
-public class GetFolderByIdQuery : IRequest<Result<FolderDto>>
+public class GetFolderByIdQuery : IRequest<Result<FolderModel>>
 {
     public Guid TenantId { get; set; }
     public Guid FolderId { get; set; }

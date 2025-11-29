@@ -1,9 +1,8 @@
 using Amazon.S3;
 using Arda9FileApi.Application.Buckets.Commands.CreateBucket;
-using Arda9FileApi.Application.DTOs;
-using Arda9FileApi.Application.Services;
-using Arda9FileApi.Infrastructure.Repositories;
-using Arda9FileApi.Infrastructure.Services;
+using Arda9FileApi.Models;
+using Arda9FileApi.Repositories;
+using Arda9FileApi.Services;
 using Ardalis.Result;
 using FluentValidation;
 using MediatR;
@@ -19,7 +18,7 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
     private readonly IAmazonS3 _s3Client;
     private readonly ILogger<UploadFileCommandHandler> _logger;
     private readonly IValidator<CreateBucketCommand> _validator;
-    private readonly IAuthService _authService;
+    private readonly ICurrentUserService _currentUserService;
 
     public UploadFileCommandHandler(
         IFileRepository fileRepository,
@@ -29,7 +28,7 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
         IAmazonS3 s3Client,
         ILogger<UploadFileCommandHandler> logger,
         IValidator<CreateBucketCommand> validator,
-        IAuthService authService
+        ICurrentUserService currentUserService
         )
     {
         _fileRepository = fileRepository;
@@ -39,7 +38,7 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
         _s3Client = s3Client;
         _validator = validator;
         _logger = logger;
-        _authService = authService;
+        _currentUserService = currentUserService;
     }
 
     public async Task<Result<UploadFileResponse>> Handle(UploadFileCommand request, CancellationToken cancellationToken)
@@ -47,10 +46,11 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
         try
         {
             // Obter ID do usuário autenticado
-            var userIdResult = _authService.GetCurrentUserId();
-            if (!userIdResult.IsSuccess)
+            var userId = _currentUserService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
             {
-                return Result.Unauthorized();
+                _logger.LogWarning("UserId not found in token");
+                return Result.Forbidden();
             }
 
             // Verificar se o bucket existe
@@ -125,7 +125,7 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
             }
 
             // Criar metadados do arquivo
-            var fileMetadata = new FileMetadataDto
+            var fileMetadata = new FileMetadataModel
             {
                 PK = $"FILE#{fileId}",
                 SK = "METADATA",
@@ -138,7 +138,7 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
                 FolderId = request.FolderId,
                 Folder = folderPath,
                 CompanyId = request.TenantId,
-                UploadedBy = userIdResult,
+                UploadedBy = userId, 
                 IsPublic = request.IsPublic,
                 PublicUrl = publicUrl,
                 CreatedAt = DateTime.UtcNow,

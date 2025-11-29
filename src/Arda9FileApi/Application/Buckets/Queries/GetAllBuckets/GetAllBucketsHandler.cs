@@ -1,8 +1,7 @@
 using Amazon.S3;
 using Ardalis.Result;
-using Arda9FileApi.Infrastructure.Repositories;
 using MediatR;
-using Arda9FileApi.Application.DTOs;
+using Arda9FileApi.Repositories;
 
 namespace Arda9FileApi.Application.Buckets.Queries.GetAllBuckets;
 
@@ -10,15 +9,18 @@ public class GetAllBucketsHandler : IRequestHandler<GetAllBucketsQuery, Result<G
 {
     private readonly IAmazonS3 _s3Client;
     private readonly IBucketRepository _bucketRepository;
+    private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly ILogger<GetAllBucketsHandler> _logger;
 
     public GetAllBucketsHandler(
         IAmazonS3 s3Client,
         IBucketRepository bucketRepository,
+        IHttpContextAccessor httpContextAccessor,
         ILogger<GetAllBucketsHandler> logger)
     {
         _s3Client = s3Client;
         _bucketRepository = bucketRepository;
+        _httpContextAccessor = httpContextAccessor;
         _logger = logger;
     }
 
@@ -60,5 +62,23 @@ public class GetAllBucketsHandler : IRequestHandler<GetAllBucketsQuery, Result<G
             _logger.LogError(ex, "Erro ao buscar buckets do S3");
             return Result<GetAllBucketsResponse>.Error();
         }
+    }
+
+    private Guid GetTenantIdFromToken()
+    {
+        var httpContext = _httpContextAccessor.HttpContext;
+        if (httpContext?.User == null)
+        {
+            return Guid.Empty;
+        }
+
+        var tenantIdClaim = httpContext.User.FindFirst("custom:tenantId")?.Value;
+        
+        if (string.IsNullOrEmpty(tenantIdClaim) || !Guid.TryParse(tenantIdClaim, out var tenantId))
+        {
+            return Guid.Empty;
+        }
+
+        return tenantId;
     }
 }

@@ -1,11 +1,11 @@
 using Ardalis.Result;
-using Arda9FileApi.Application.DTOs;
-using Arda9FileApi.Infrastructure.Repositories;
 using MediatR;
+using Arda9FileApi.Repositories;
+using Arda9FileApi.Models;
 
 namespace Arda9FileApi.Application.Files.Queries.GetFileById;
 
-public class GetFileByIdQueryHandler : IRequestHandler<GetFileByIdQuery, Result<FileMetadataDto>>
+public class GetFileByIdQueryHandler : IRequestHandler<GetFileByIdQuery, Result<FileMetadataModel>>
 {
     private readonly IFileRepository _repository;
     private readonly ILogger<GetFileByIdQueryHandler> _logger;
@@ -18,7 +18,7 @@ public class GetFileByIdQueryHandler : IRequestHandler<GetFileByIdQuery, Result<
         _logger = logger;
     }
 
-    public async Task<Result<FileMetadataDto>> Handle(GetFileByIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<FileMetadataModel>> Handle(GetFileByIdQuery request, CancellationToken cancellationToken)
     {
         try
         {
@@ -27,22 +27,22 @@ public class GetFileByIdQueryHandler : IRequestHandler<GetFileByIdQuery, Result<
             if (file == null || file.IsDeleted)
             {
                 _logger.LogWarning("File {FileId} not found", request.FileId);
-                return Result<FileMetadataDto>.NotFound();
+                return Result<FileMetadataModel>.NotFound();
             }
 
             if (file.CompanyId != request.TenantId)
             {
                 _logger.LogWarning("File {FileId} does not belong to tenant {TenantId}", 
                     request.FileId, request.TenantId);
-                return Result<FileMetadataDto>.Forbidden();
+                return Result<FileMetadataModel>.Forbidden();
             }
 
-            return Result<FileMetadataDto>.Success(file);
+            return Result<FileMetadataModel>.Success(file);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving file {FileId}", request.FileId);
-            return Result<FileMetadataDto>.Error();
+            return Result<FileMetadataModel>.Error();
         }
     }
 }

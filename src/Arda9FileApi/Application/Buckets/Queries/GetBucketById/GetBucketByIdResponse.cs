@@ -1,8 +1,8 @@
-using Arda9FileApi.Application.DTOs;
+using Arda9FileApi.Models;
 
 namespace Arda9FileApi.Application.Buckets.Queries.GetBucketById;
 
 public class GetBucketByIdResponse
 {
-    public BucketDto? Bucket { get; set; }
+    public BucketModel? Bucket { get; set; }
 }

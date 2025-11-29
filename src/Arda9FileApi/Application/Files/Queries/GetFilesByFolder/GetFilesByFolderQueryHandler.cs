@@ -1,11 +1,11 @@
 using Ardalis.Result;
-using Arda9FileApi.Application.DTOs;
-using Arda9FileApi.Infrastructure.Repositories;
 using MediatR;
+using Arda9FileApi.Repositories;
+using Arda9FileApi.Models;
 
 namespace Arda9FileApi.Application.Files.Queries.GetFilesByFolder;
 
-public class GetFilesByFolderQueryHandler : IRequestHandler<GetFilesByFolderQuery, Result<List<FileMetadataDto>>>
+public class GetFilesByFolderQueryHandler : IRequestHandler<GetFilesByFolderQuery, Result<List<FileMetadataModel>>>
 {
     private readonly IFileRepository _fileRepository;
     private readonly IFolderRepository _folderRepository;
@@ -21,33 +21,34 @@ public class GetFilesByFolderQueryHandler : IRequestHandler<GetFilesByFolderQuer
         _logger = logger;
     }
 
-    public async Task<Result<List<FileMetadataDto>>> Handle(GetFilesByFolderQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<FileMetadataModel>>> Handle(GetFilesByFolderQuery request, CancellationToken cancellationToken)
     {
         try
         {
+            //await _repository.GetByIdAsync(request.FolderId);
             var folder = await _folderRepository.GetByIdAsync(request.FolderId);
             if (folder == null || folder.IsDeleted)
             {
                 _logger.LogWarning("Folder {FolderId} not found", request.FolderId);
-                return Result<List<FileMetadataDto>>.NotFound();
+                return Result<List<FileMetadataModel>>.NotFound();
             }
 
             if (folder.CompanyId != request.TenantId)
             {
                 _logger.LogWarning("Folder {FolderId} does not belong to tenant {TenantId}", 
                     request.FolderId, request.TenantId);
-                return Result<List<FileMetadataDto>>.Forbidden();
+                return Result<List<FileMetadataModel>>.Forbidden();
             }
 
             // Usar GSI2 para buscar arquivos por FolderId
             var folderFiles = await _fileRepository.GetByFolderIdAsync(request.FolderId);
 
-            return Result<List<FileMetadataDto>>.Success(folderFiles);
+            return Result<List<FileMetadataModel>>.Success(folderFiles);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving files for folder {FolderId}", request.FolderId);
-            return Result<List<FileMetadataDto>>.Error();
+            return Result<List<FileMetadataModel>>.Error();
         }
     }
 }

@@ -1,5 +1,5 @@
-using Arda9FileApi.Application.DTOs;
-using Arda9FileApi.Infrastructure.Repositories;
+using Arda9FileApi.Models;
+using Arda9FileApi.Repositories;
 using Ardalis.Result;
 using MediatR;
 
@@ -66,7 +66,7 @@ public class CreateFolderCommandHandler : IRequestHandler<CreateFolderCommand, R
 
             // Criar a pasta
             var folderId = Guid.NewGuid();
-            var folder = new FolderDto
+            var folder = new FolderModel
             {
                 Id = folderId,
                 FolderName = request.FolderName,

@@ -1,17 +1,17 @@
 using Ardalis.Result;
-using Arda9FileApi.Application.DTOs;
-using Arda9FileApi.Infrastructure.Repositories;
 using MediatR;
+using Arda9FileApi.Repositories;
+using Arda9FileApi.Models;
 
 namespace Arda9FileApi.Application.Files.Queries.GetFilesByBucket;
 
-public class GetFilesByBucketQuery : IRequest<Result<List<FileMetadataDto>>>
+public class GetFilesByBucketQuery : IRequest<Result<List<FileMetadataModel>>>
 {
     public Guid TenantId { get; set; }
-    public string BucketName { get; set; } = string.Empty;
+    public Guid BucketId { get; set; }
 }
 
-public class GetFilesByBucketQueryHandler : IRequestHandler<GetFilesByBucketQuery, Result<List<FileMetadataDto>>>
+public class GetFilesByBucketQueryHandler : IRequestHandler<GetFilesByBucketQuery, Result<List<FileMetadataModel>>>
 {
     private readonly IFileRepository _fileRepository;
     private readonly IBucketRepository _bucketRepository;
@@ -27,33 +27,33 @@ public class GetFilesByBucketQueryHandler : IRequestHandler<GetFilesByBucketQuer
         _logger = logger;
     }
 
-    public async Task<Result<List<FileMetadataDto>>> Handle(GetFilesByBucketQuery request, CancellationToken cancellationToken)
+    public async Task<Result<List<FileMetadataModel>>> Handle(GetFilesByBucketQuery request, CancellationToken cancellationToken)
     {
         try
         {
-            var bucket = await _bucketRepository.GetByBucketNameAsync(request.BucketName);
+            var bucket = await _bucketRepository.GetByIdAsync(request.BucketId);
             if (bucket == null)
             {
-                _logger.LogWarning("Bucket {BucketName} not found", request.BucketName);
-                return Result<List<FileMetadataDto>>.NotFound();
+                _logger.LogWarning("Bucket {BucketName} not found", request.BucketId);
+                return Result<List<FileMetadataModel>>.NotFound();
             }
 
             if (bucket.CompanyId != request.TenantId)
             {
                 _logger.LogWarning("Bucket {BucketName} does not belong to tenant {TenantId}", 
-                    request.BucketName, request.TenantId);
-                return Result<List<FileMetadataDto>>.Forbidden();
+                    request.BucketId, request.TenantId);
+                return Result<List<FileMetadataModel>>.Forbidden();
             }
 
             // Usar GSI1 para buscar arquivos por BucketId
             var files = await _fileRepository.GetByBucketIdAsync(bucket.Id);
 
-            return Result<List<FileMetadataDto>>.Success(files);
+            return Result<List<FileMetadataModel>>.Success(files);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving files for bucket {BucketName}", request.BucketName);
-            return Result<List<FileMetadataDto>>.Error();
+            _logger.LogError(ex, "Error retrieving files for bucket {BucketName}", request.BucketId);
+            return Result<List<FileMetadataModel>>.Error();
         }
     }
 }

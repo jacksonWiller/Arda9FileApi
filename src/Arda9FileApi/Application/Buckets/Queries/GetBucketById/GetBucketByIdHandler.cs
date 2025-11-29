@@ -1,6 +1,6 @@
 using Ardalis.Result;
-using Arda9FileApi.Infrastructure.Repositories;
 using MediatR;
+using Arda9FileApi.Repositories;
 
 namespace Arda9FileApi.Application.Buckets.Queries.GetBucketById;
 

@@ -1,7 +1,7 @@
 using Amazon.S3;
 using Amazon.S3.Model;
 using Arda9FileApi.Application.Buckets.Commands.CreateBucket;
-using Arda9FileApi.Infrastructure.Repositories;
+using Arda9FileApi.Repositories;
 using Ardalis.Result;
 using Ardalis.Result.FluentValidation;
 using FluentValidation;

@@ -1,7 +1,7 @@
 using Amazon.S3;
 using Amazon.S3.Model;
-using Arda9FileApi.Infrastructure.Repositories;
-using Arda9FileApi.Infrastructure.Services;
+using Arda9FileApi.Repositories;
+using Arda9FileApi.Services;
 using Ardalis.Result;
 using Ardalis.Result.FluentValidation;
 using FluentValidation;
