@@ -1,21 +1,22 @@
+using Arda9FileApi.Application.Files.Commands.DeleteFile;
+using Arda9FileApi.Application.Files.Commands.DuplicateFile;
+using Arda9FileApi.Application.Files.Commands.MoveFile;
+using Arda9FileApi.Application.Files.Commands.RestoreFile;
+using Arda9FileApi.Application.Files.Commands.UpdateFile;
+using Arda9FileApi.Application.Files.Commands.UploadFile;
+using Arda9FileApi.Application.Files.Queries.DownloadFile;
+using Arda9FileApi.Application.Files.Queries.GetFileById;
+using Arda9FileApi.Application.Files.Queries.GetFileDownloadUrl;
+using Arda9FileApi.Application.Files.Queries.GetFiles;
+using Arda9FileApi.Application.Files.Queries.GetFilesByBucket;
+using Arda9FileApi.Application.Files.Queries.GetFilesByFolder;
+using Arda9FileApi.Application.Files.Queries.GetRootFiles;
+using Core.Api.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Mime;
-using Arda9FileApi.Core.Api.Extensions;
-using Arda9FileApi.Application.Files.Commands.DuplicateFile;
-using Arda9FileApi.Application.Files.Commands.MoveFile;
-using Arda9FileApi.Application.Files.Commands.UpdateFile;
-using Arda9FileApi.Application.Files.Commands.UploadFile;
-using Arda9FileApi.Application.Files.Queries.GetFiles;
-using Arda9FileApi.Application.Files.Queries.GetFileById;
-using Arda9FileApi.Application.Files.Queries.GetFilesByBucket;
-using Arda9FileApi.Application.Files.Queries.GetRootFiles;
-using Arda9FileApi.Application.Files.Queries.GetFilesByFolder;
-using Arda9FileApi.Application.Files.Queries.DownloadFile;
-using Arda9FileApi.Application.Files.Queries.GetFileDownloadUrl;
-using Arda9FileApi.Application.Files.Commands.DeleteFile;
-using Arda9FileApi.Application.Files.Commands.RestoreFile;
+
 
 namespace Arda9FileApi.Controllers;
 
@@ -40,44 +41,8 @@ public class FilesController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetFiles(
-        Guid tenantId,
-        [FromQuery] int page = 1,
-        [FromQuery] int limit = 50,
-        [FromQuery] string? sortBy = "createdAt",
-        [FromQuery] string? order = "desc",
-        [FromQuery] Guid? folderId = null,
-        [FromQuery] string? type = null,
-        [FromQuery] string? extension = null,
-        [FromQuery] bool? isFavorite = null,
-        [FromQuery] bool? isShared = null,
-        [FromQuery] string? tags = null,
-        [FromQuery] string? search = null,
-        [FromQuery] long? minSize = null,
-        [FromQuery] long? maxSize = null,
-        [FromQuery] DateTime? fromDate = null,
-        [FromQuery] DateTime? toDate = null)
+    public async Task<IActionResult> GetFiles(Guid tenantId, [FromQuery] GetFilesQuery query)
     {
-        var query = new GetFilesQuery
-        {
-            TenantId = tenantId,
-            Page = page,
-            Limit = limit,
-            SortBy = sortBy,
-            Order = order,
-            FolderId = folderId,
-            Type = type,
-            Extension = extension,
-            IsFavorite = isFavorite,
-            IsShared = isShared,
-            Tags = tags,
-            Search = search,
-            MinSize = minSize,
-            MaxSize = maxSize,
-            FromDate = fromDate,
-            ToDate = toDate
-        };
-
         var result = await _mediator.Send(query);
         return result.ToActionResult();
     }

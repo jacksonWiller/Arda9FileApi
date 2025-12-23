@@ -35,4 +35,11 @@
     <InternalsVisibleTo Include="ServerlessAPI.Tests" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Arda9File.Application\Arda9File.Application.csproj" />
+    <ProjectReference Include="..\Arda9File.Core\Arda9File.Core.csproj" />
+    <ProjectReference Include="..\Arda9File.Domain\Arda9File.Domain.csproj" />
+    <ProjectReference Include="..\Arda9File.Infra\Arda9File.Infra.csproj" />
+  </ItemGroup>
+
 </Project>

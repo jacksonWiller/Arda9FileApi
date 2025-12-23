@@ -2,7 +2,8 @@ using Ardalis.Result;
 using MediatR;
 using Arda9FileApi.Repositories;
 using Arda9FileApi.Services;
-using Arda9FileApi.Core.Application.Common.Models;
+using Microsoft.Extensions.Logging;
+using Core.Application.Common.Models;
 
 namespace Arda9FileApi.Application.Files.Queries.GetFiles;
 

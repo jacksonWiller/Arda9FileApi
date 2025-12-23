@@ -2,6 +2,7 @@ using Ardalis.Result;
 using MediatR;
 using Arda9FileApi.Repositories;
 using Arda9FileApi.Services;
+using Microsoft.Extensions.Logging;
 
 namespace Arda9FileApi.Application.Files.Queries.GetFileDownloadUrl;
 

@@ -1,7 +1,8 @@
 using System.Text.Json.Serialization;
+using Arda9File.Core.Api.Models;
 using Microsoft.AspNetCore.Http;
 
-namespace Core.Api.Models;
+namespace Arda9File.Core.Api.Models;
 
 public sealed class ApiResponse<T> : ApiResponse
 {

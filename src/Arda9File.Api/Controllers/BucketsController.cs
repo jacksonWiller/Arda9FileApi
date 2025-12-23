@@ -3,7 +3,7 @@ using Arda9FileApi.Application.Buckets.Commands.CreateBucket;
 using Arda9FileApi.Application.Buckets.Commands.DeleteBucket;
 using Arda9FileApi.Application.Buckets.Queries.GetAllBuckets;
 using Arda9FileApi.Application.Buckets.Queries.GetBucketById;
-using Arda9FileApi.Core.Api.Extensions;
+using Core.Api.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,7 +13,7 @@ namespace Arda9FileApi.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Produces(MediaTypeNames.Application.Json)]
-//[Authorize]
+[Authorize]
 public class BucketsController : ControllerBase
 {
     private readonly IMediator _mediator;

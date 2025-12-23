@@ -2,6 +2,8 @@ using Ardalis.Result;
 using MediatR;
 using Arda9FileApi.Repositories;
 using Arda9FileApi.Models;
+using Arda9File.Domain.Repositories;
+using Microsoft.Extensions.Logging;
 
 namespace Arda9FileApi.Application.Files.Queries.GetFilesByBucket;
 
