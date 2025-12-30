@@ -6,6 +6,7 @@ using Amazon.S3;
 using Amazon.S3Control;
 using Amazon.SecretsManager;
 using Arda9File.Domain.Repositories;
+using Arda9FileApi.Application.Files.Commands.UploadFile;
 using Arda9FileApi.Repositories;
 using Arda9FileApi.Services;
 using Core.Application.Behaviors;
@@ -85,15 +86,18 @@ builder.Services.AddAuthorization();
 builder.Services.AddMediatR(cfg =>
 {
     cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+    cfg.RegisterServicesFromAssembly(typeof(UploadFileCommand).Assembly);
 
     // Adicionar behaviors (opcional)
     cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
 });
 
 builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+builder.Services.AddValidatorsFromAssembly(typeof(UploadFileCommand).Assembly);
 
 // Configurar AutoMapper
 builder.Services.AddAutoMapper(Assembly.GetExecutingAssembly());
+builder.Services.AddAutoMapper(typeof(UploadFileCommand).Assembly);
 
 // Add Swagger services
 builder.Services.AddEndpointsApiExplorer();
