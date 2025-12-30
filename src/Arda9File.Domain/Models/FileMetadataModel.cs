@@ -10,7 +10,7 @@ namespace Arda9FileApi.Models;
 /// GSI2: FOLDER#{FolderId} -> Lista arquivos por pasta
 /// GSI3: COMPANY#{CompanyId} -> Lista arquivos por empresa
 /// </summary>
-[DynamoDBTable("arda9-file-v3")]
+[DynamoDBTable("arda9-file-v2")]
 public class FileMetadataModel : DynamoSingleTableEntity
 {
     [DynamoDBIgnore]

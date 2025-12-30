@@ -44,18 +44,19 @@ public class CreateBucketHandler : IRequestHandler<CreateBucketCommand, Result<C
             }
 
             // Extrair TenantId e UserId do token JWT
-            var tenantId = _currentUserService.GetTenantId();
+            //var tenantId = _currentUserService.GetTenantId();
+            var tenantId = request.TenantId;
             if (tenantId == Guid.Empty)
             {
                 _logger.LogWarning("TenantId not found in token");
-                return Result<CreateBucketResponse>.Forbidden();
+                return Result<CreateBucketResponse>.Error("TenantId not found in token");
             }
 
             var userId = _currentUserService.GetUserId();
             if (string.IsNullOrEmpty(userId))
             {
                 _logger.LogWarning("UserId not found in token");
-                return Result<CreateBucketResponse>.Forbidden();
+                return Result<CreateBucketResponse>.Error("UserId not found in token");
             }
 
             // Verificar se bucket já existe
@@ -63,7 +64,7 @@ public class CreateBucketHandler : IRequestHandler<CreateBucketCommand, Result<C
             if (existingBucket != null)
             {
                 _logger.LogWarning("Bucket {BucketName} already exists in database", request.BucketName);
-                return Result<CreateBucketResponse>.Error();
+                return Result<CreateBucketResponse>.Error("Bucket {BucketName} already exists in database");
             }
 
             // Verificar se bucket já existe no S3
@@ -71,7 +72,7 @@ public class CreateBucketHandler : IRequestHandler<CreateBucketCommand, Result<C
             if (bucketExists)
             {
                 _logger.LogWarning("Bucket {BucketName} already exists in S3", request.BucketName);
-                return Result<CreateBucketResponse>.Error();
+                return Result<CreateBucketResponse>.Error("Bucket {BucketName} already exists in S3");
             }
 
             // Criar bucket no S3 usando o S3Service
@@ -88,7 +89,7 @@ public class CreateBucketHandler : IRequestHandler<CreateBucketCommand, Result<C
             if (!bucketCreated)
             {
                 _logger.LogError("Failed to create bucket {BucketName} in S3", request.BucketName);
-                return Result<CreateBucketResponse>.Error();
+                return Result<CreateBucketResponse>.Error("Failed to create bucket {BucketName} in S3");
             }
 
             // Criar registro no DynamoDB

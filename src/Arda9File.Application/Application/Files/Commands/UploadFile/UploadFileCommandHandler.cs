@@ -81,7 +81,7 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
                 if (parentFolder == null || parentFolder.IsDeleted)
                 {
                     _logger.LogWarning("Parent folder {ParentFolderId} not found", request.FolderId);
-                    return Result.Error();
+                    return Result.Error("Parent folder {ParentFolderId} not found");
                 }
 
                 // Verificar se a pasta pai pertence ao mesmo bucket
@@ -89,7 +89,7 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
                 {
                     _logger.LogWarning("Parent folder {ParentFolderId} does not belong to bucket {BucketId}",
                         request.FolderId, request.BucketId);
-                    return Result.Error();
+                    return Result.Error("Parent folder {ParentFolderId} does not belong to bucket {BucketId}");
                 }
             }
 
@@ -115,7 +115,7 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
             if (!uploadResult)
             {
                 _logger.LogError("Failed to upload file to S3: {S3Key}", s3Key);
-                return Result.Error();
+                return Result.Error("Failed to upload file to S3: {S3Key}");
             }
 
             // Obter URL pública se o arquivo for público
@@ -166,7 +166,7 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error processing file upload: {FileName}", request.File?.FileName);
-            return Result.Error();
+            return Result.Error("Error processing file upload: {FileName}");
         }
     }
 
