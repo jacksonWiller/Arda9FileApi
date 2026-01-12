@@ -1,6 +1,6 @@
 using Arda9File.Application.Services;
+using Arda9File.Domain.Models;
 using Arda9File.Domain.Repositories;
-using Arda9FileApi.Models;
 using Ardalis.Result;
 using Ardalis.Result.FluentValidation;
 using FluentValidation;

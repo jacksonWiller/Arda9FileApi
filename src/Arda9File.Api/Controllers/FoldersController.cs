@@ -1,7 +1,3 @@
-using Arda9FileApi.Application.Folders.Commands.DeleteFolder;
-using Arda9FileApi.Application.Folders.Queries.GetFolderById;
-using Arda9FileApi.Application.Folders.Queries.GetFoldersByBucket;
-using Arda9FileApi.Application.Folders.Queries.GetFoldersByParent;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -10,6 +6,10 @@ using Arda9File.Application.Application.Folders.Commands.CreateFolder;
 using Arda9File.Application.Application.Folders.Commands.MoveFolder;
 using Arda9File.Application.Application.Folders.Commands.UpdateFolder;
 using Arda9File.Application.Application.Folders.Queries.GetFolders;
+using Arda9File.Application.Application.Folders.Queries.GetFolderById;
+using Arda9File.Application.Application.Folders.Queries.GetFoldersByBucket;
+using Arda9File.Application.Application.Folders.Queries.GetFoldersByParent;
+using Arda9File.Application.Application.Folders.Commands.DeleteFolder;
 
 namespace Arda9FileApi.Controllers;
 

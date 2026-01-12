@@ -1,8 +1,8 @@
 using Amazon.S3;
 using Arda9File.Application.Application.Buckets.Commands.CreateBucket;
 using Arda9File.Application.Services;
+using Arda9File.Domain.Models;
 using Arda9File.Domain.Repositories;
-using Arda9FileApi.Models;
 using Arda9FileApi.Repositories;
 using Ardalis.Result;
 using FluentValidation;

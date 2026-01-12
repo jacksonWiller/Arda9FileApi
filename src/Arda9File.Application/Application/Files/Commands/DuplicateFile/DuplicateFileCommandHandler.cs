@@ -1,9 +1,9 @@
 using Ardalis.Result;
 using MediatR;
 using Arda9FileApi.Repositories;
-using Arda9FileApi.Models;
 using Microsoft.Extensions.Logging;
 using Arda9File.Application.Services;
+using Arda9File.Domain.Models;
 
 namespace Arda9File.Application.Application.Files.Commands.DuplicateFile;
 
