@@ -1,11 +1,11 @@
 using Ardalis.Result;
 using MediatR;
 using Arda9FileApi.Repositories;
-using Arda9FileApi.Services;
 using Arda9FileApi.Models;
 using Microsoft.Extensions.Logging;
+using Arda9File.Application.Services;
 
-namespace Arda9FileApi.Application.Files.Commands.DuplicateFile;
+namespace Arda9File.Application.Application.Files.Commands.DuplicateFile;
 
 public class DuplicateFileCommandHandler : IRequestHandler<DuplicateFileCommand, Result<DuplicateFileResponse>>
 {

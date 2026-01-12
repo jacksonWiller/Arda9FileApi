@@ -1,7 +1,7 @@
 using Ardalis.Result;
 using MediatR;
 
-namespace Arda9FileApi.Application.Files.Commands.MoveFile;
+namespace Arda9File.Application.Application.Files.Commands.MoveFile;
 
 public class MoveFileCommand : IRequest<Result<MoveFileResponse>>
 {

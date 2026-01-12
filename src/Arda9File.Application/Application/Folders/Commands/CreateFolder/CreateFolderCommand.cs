@@ -2,7 +2,7 @@ using Ardalis.Result;
 using MediatR;
 using System.Text.Json.Serialization;
 
-namespace Arda9FileApi.Application.Folders.Commands.CreateFolder;
+namespace Arda9File.Application.Application.Folders.Commands.CreateFolder;
 
 public class CreateFolderCommand : IRequest<Result<CreateFolderResponse>>
 {

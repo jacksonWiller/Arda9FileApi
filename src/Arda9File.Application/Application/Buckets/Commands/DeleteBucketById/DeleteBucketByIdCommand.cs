@@ -1,7 +1,7 @@
 using Ardalis.Result;
 using MediatR;
 
-namespace Arda9FileApi.Application.Buckets.Commands.DeleteBucketById;
+namespace Arda9File.Application.Application.Buckets.Commands.DeleteBucketById;
 
 public class DeleteBucketByIdCommand : IRequest<Result>
 {

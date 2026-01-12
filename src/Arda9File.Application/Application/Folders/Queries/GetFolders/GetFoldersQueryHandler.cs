@@ -1,10 +1,10 @@
 using Ardalis.Result;
 using MediatR;
 using Arda9FileApi.Repositories;
-using Arda9FileApi.Models;
 using Microsoft.Extensions.Logging;
+using Arda9File.Domain.Models;
 
-namespace Arda9FileApi.Application.Folders.Queries.GetFolders;
+namespace Arda9File.Application.Application.Folders.Queries.GetFolders;
 
 public class GetFoldersQueryHandler : IRequestHandler<GetFoldersQuery, Result<GetFoldersResponse>>
 {
@@ -27,7 +27,7 @@ public class GetFoldersQueryHandler : IRequestHandler<GetFoldersQuery, Result<Ge
         try
         {
             // Validate depth
-            var depth = request.Depth < 1 ? 1 : (request.Depth > 5 ? 5 : request.Depth);
+            var depth = request.Depth < 1 ? 1 : request.Depth > 5 ? 5 : request.Depth;
 
             List<FolderDetailDto> folders;
 

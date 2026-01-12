@@ -1,10 +1,10 @@
 using Ardalis.Result;
 using MediatR;
 using Arda9FileApi.Repositories;
-using Arda9FileApi.Services;
 using Microsoft.Extensions.Logging;
+using Arda9File.Application.Services;
 
-namespace Arda9FileApi.Application.Files.Queries.GetFileDownloadUrl;
+namespace Arda9File.Application.Application.Files.Queries.GetFileDownloadUrl;
 
 public class GetFileDownloadUrlQueryHandler : IRequestHandler<GetFileDownloadUrlQuery, Result<GetFileDownloadUrlResponse>>
 {

@@ -2,7 +2,7 @@ using Ardalis.Result;
 using MediatR;
 using System.Text.Json.Serialization;
 
-namespace Arda9FileApi.Application.Files.Commands.UpdateFile;
+namespace Arda9File.Application.Application.Files.Commands.UpdateFile;
 
 public class UpdateFileCommand : IRequest<Result<UpdateFileResponse>>
 {

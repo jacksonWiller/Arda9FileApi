@@ -1,12 +1,11 @@
 using Amazon.S3;
 using Ardalis.Result;
 using MediatR;
-using Arda9FileApi.Repositories;
 using Arda9File.Domain.Repositories;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
-namespace Arda9FileApi.Application.Buckets.Queries.GetAllBuckets;
+namespace Arda9File.Application.Application.Buckets.Queries.GetAllBuckets;
 
 public class GetAllBucketsHandler : IRequestHandler<GetAllBucketsQuery, Result<GetAllBucketsResponse>>
 {

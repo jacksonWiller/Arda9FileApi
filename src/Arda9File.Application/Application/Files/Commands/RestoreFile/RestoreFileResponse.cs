@@ -1,4 +1,4 @@
-namespace Arda9FileApi.Application.Files.Commands.RestoreFile;
+namespace Arda9File.Application.Application.Files.Commands.RestoreFile;
 
 public class RestoreFileResponse
 {

@@ -1,6 +1,6 @@
-using Arda9FileApi.Models;
+using Arda9File.Domain.Models;
 
-namespace Arda9FileApi.Application.Files.Commands.UploadFile;
+namespace Arda9File.Application.Application.Files.Commands.UploadFile;
 
 public class UploadFileResponse
 {

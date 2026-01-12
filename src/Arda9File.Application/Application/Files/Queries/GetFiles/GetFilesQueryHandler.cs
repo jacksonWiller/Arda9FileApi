@@ -1,11 +1,11 @@
 using Ardalis.Result;
 using MediatR;
 using Arda9FileApi.Repositories;
-using Arda9FileApi.Services;
 using Microsoft.Extensions.Logging;
 using Core.Application.Common.Models;
+using Arda9File.Application.Services;
 
-namespace Arda9FileApi.Application.Files.Queries.GetFiles;
+namespace Arda9File.Application.Application.Files.Queries.GetFiles;
 
 public class GetFilesQueryHandler : IRequestHandler<GetFilesQuery, Result<GetFilesResponse>>
 {
@@ -116,7 +116,7 @@ public class GetFilesQueryHandler : IRequestHandler<GetFilesQuery, Result<GetFil
             // Apply pagination
             var total = filesList.Count;
             var page = request.Page < 1 ? 1 : request.Page;
-            var limit = request.Limit < 1 ? 50 : (request.Limit > 100 ? 100 : request.Limit);
+            var limit = request.Limit < 1 ? 50 : request.Limit > 100 ? 100 : request.Limit;
             
             var paginatedFiles = filesList
                 .Skip((page - 1) * limit)

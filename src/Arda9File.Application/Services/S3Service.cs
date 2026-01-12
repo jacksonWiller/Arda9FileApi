@@ -1,5 +1,6 @@
 using Amazon.S3;
 using Amazon.S3.Model;
+using Arda9File.Application.Services;
 using Microsoft.Extensions.Logging;
 using System.Text.Json;
 

@@ -2,7 +2,7 @@ using Ardalis.Result;
 using MediatR;
 using System.Text.Json.Serialization;
 
-namespace Arda9FileApi.Application.Folders.Commands.UpdateFolder;
+namespace Arda9File.Application.Application.Folders.Commands.UpdateFolder;
 
 public class UpdateFolderCommand : IRequest<Result<UpdateFolderResponse>>
 {

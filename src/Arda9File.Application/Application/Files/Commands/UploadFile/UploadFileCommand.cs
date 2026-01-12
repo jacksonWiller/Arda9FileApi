@@ -3,7 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Http;
 using System.Text.Json.Serialization;
 
-namespace Arda9FileApi.Application.Files.Commands.UploadFile;
+namespace Arda9File.Application.Application.Files.Commands.UploadFile;
 
 public class UploadFileCommand : IRequest<Result<UploadFileResponse>>
 {

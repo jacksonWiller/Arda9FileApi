@@ -1,8 +1,8 @@
 using System.Net.Mime;
-using Arda9FileApi.Application.Buckets.Commands.CreateBucket;
+using Arda9File.Application.Application.Buckets.Commands.CreateBucket;
+using Arda9File.Application.Application.Buckets.Queries.GetAllBuckets;
+using Arda9File.Application.Application.Buckets.Queries.GetBucketById;
 using Arda9FileApi.Application.Buckets.Commands.DeleteBucket;
-using Arda9FileApi.Application.Buckets.Queries.GetAllBuckets;
-using Arda9FileApi.Application.Buckets.Queries.GetBucketById;
 using Core.Api.Extensions;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;

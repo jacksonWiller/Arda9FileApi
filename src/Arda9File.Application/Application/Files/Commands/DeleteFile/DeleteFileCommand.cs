@@ -1,7 +1,7 @@
 using Ardalis.Result;
 using MediatR;
 
-namespace Arda9FileApi.Application.Files.Commands.DeleteFile;
+namespace Arda9File.Application.Application.Files.Commands.DeleteFile;
 
 public class DeleteFileCommand : IRequest<Result>
 {

@@ -1,14 +1,13 @@
+using Arda9File.Application.Services;
 using Arda9File.Domain.Repositories;
 using Arda9FileApi.Models;
-using Arda9FileApi.Repositories;
-using Arda9FileApi.Services;
 using Ardalis.Result;
 using Ardalis.Result.FluentValidation;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace Arda9FileApi.Application.Buckets.Commands.CreateBucket;
+namespace Arda9File.Application.Application.Buckets.Commands.CreateBucket;
 
 public class CreateBucketHandler : IRequestHandler<CreateBucketCommand, Result<CreateBucketResponse>>
 {

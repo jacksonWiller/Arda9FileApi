@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace Arda9FileApi.Application.Folders.Commands.UpdateFolder;
+namespace Arda9File.Application.Application.Folders.Commands.UpdateFolder;
 
 public class UpdateFolderCommandValidator : AbstractValidator<UpdateFolderCommand>
 {

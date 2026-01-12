@@ -1,10 +1,10 @@
 using Amazon.DynamoDBv2.DataModel;
 using Amazon.DynamoDBv2.DocumentModel;
+using Arda9File.Domain.Models;
 using Arda9File.Domain.Repositories;
-using Arda9FileApi.Models;
 using Microsoft.Extensions.Logging;
 
-namespace Arda9FileApi.Repositories;
+namespace Arda9File.Infra.Repositories;
 
 public class BucketRepository : IBucketRepository
 {

@@ -1,5 +1,6 @@
 using Amazon.S3;
 using Amazon.S3.Model;
+using Arda9File.Application.Application.Buckets.Commands.DeleteBucket;
 using Arda9File.Domain.Repositories;
 using Arda9FileApi.Application.Buckets.Commands.CreateBucket;
 using Arda9FileApi.Repositories;

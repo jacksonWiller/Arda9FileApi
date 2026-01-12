@@ -3,7 +3,7 @@ using MediatR;
 using Arda9FileApi.Repositories;
 using Microsoft.Extensions.Logging;
 
-namespace Arda9FileApi.Application.Folders.Commands.UpdateFolder;
+namespace Arda9File.Application.Application.Folders.Commands.UpdateFolder;
 
 public class UpdateFolderCommandHandler : IRequestHandler<UpdateFolderCommand, Result<UpdateFolderResponse>>
 {

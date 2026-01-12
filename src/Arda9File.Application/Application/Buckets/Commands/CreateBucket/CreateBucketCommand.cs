@@ -2,7 +2,7 @@ using Ardalis.Result;
 using MediatR;
 using System.Text.Json.Serialization;
 
-namespace Arda9FileApi.Application.Buckets.Commands.CreateBucket;
+namespace Arda9File.Application.Application.Buckets.Commands.CreateBucket;
 
 public class CreateBucketCommand : IRequest<Result<CreateBucketResponse>>
 {

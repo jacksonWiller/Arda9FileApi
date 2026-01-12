@@ -1,6 +1,6 @@
 using Amazon.DynamoDBv2.DataModel;
 
-namespace Arda9FileApi.Models;
+namespace Arda9File.Domain.Models;
 
 public class CompanySettingsModel
 {

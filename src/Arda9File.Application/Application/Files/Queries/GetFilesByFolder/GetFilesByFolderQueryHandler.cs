@@ -1,10 +1,10 @@
 using Ardalis.Result;
 using MediatR;
 using Arda9FileApi.Repositories;
-using Arda9FileApi.Models;
 using Microsoft.Extensions.Logging;
+using Arda9File.Domain.Models;
 
-namespace Arda9FileApi.Application.Files.Queries.GetFilesByFolder;
+namespace Arda9File.Application.Application.Files.Queries.GetFilesByFolder;
 
 public class GetFilesByFolderQueryHandler : IRequestHandler<GetFilesByFolderQuery, Result<List<FileMetadataModel>>>
 {

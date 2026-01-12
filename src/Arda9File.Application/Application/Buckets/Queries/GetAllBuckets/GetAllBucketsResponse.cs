@@ -1,6 +1,6 @@
-using Arda9FileApi.Models;
+using Arda9File.Domain.Models;
 
-namespace Arda9FileApi.Application.Buckets.Queries.GetAllBuckets;
+namespace Arda9File.Application.Application.Buckets.Queries.GetAllBuckets;
 
 public class GetAllBucketsResponse
 {

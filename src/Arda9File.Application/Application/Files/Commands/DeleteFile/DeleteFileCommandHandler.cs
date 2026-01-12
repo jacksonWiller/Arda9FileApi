@@ -1,10 +1,10 @@
 using Ardalis.Result;
 using MediatR;
 using Arda9FileApi.Repositories;
-using Arda9FileApi.Services;
 using Microsoft.Extensions.Logging;
+using Arda9File.Application.Services;
 
-namespace Arda9FileApi.Application.Files.Commands.DeleteFile;
+namespace Arda9File.Application.Application.Files.Commands.DeleteFile;
 
 public class DeleteFileCommandHandler : IRequestHandler<DeleteFileCommand, Result>
 {

@@ -1,8 +1,6 @@
-
-
 using Core.Application.Common.Models;
 
-namespace Arda9FileApi.Application.Files.Queries.GetFiles;
+namespace Arda9File.Application.Application.Files.Queries.GetFiles;
 
 public class GetFilesResponse
 {

@@ -1,6 +1,6 @@
-using Arda9FileApi.Models;
+using Arda9File.Domain.Models;
 
-namespace Arda9FileApi.Application.Folders.Commands.CreateFolder;
+namespace Arda9File.Application.Application.Folders.Commands.CreateFolder;
 
 public class CreateFolderResponse
 {

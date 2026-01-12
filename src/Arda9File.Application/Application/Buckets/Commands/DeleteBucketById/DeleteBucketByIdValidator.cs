@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace Arda9FileApi.Application.Buckets.Commands.DeleteBucketById;
+namespace Arda9File.Application.Application.Buckets.Commands.DeleteBucketById;
 
 public class DeleteBucketByIdValidator : AbstractValidator<DeleteBucketByIdCommand>
 {

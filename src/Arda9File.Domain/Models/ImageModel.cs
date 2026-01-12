@@ -1,6 +1,6 @@
 using Amazon.DynamoDBv2.DataModel;
 
-namespace Arda9FileApi.Models;
+namespace Arda9File.Domain.Models;
 
 /// <summary>
 /// DTO para representar uma Image nas respostas da API e persistência no DynamoDB

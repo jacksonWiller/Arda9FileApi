@@ -1,11 +1,11 @@
 using Ardalis.Result;
 using MediatR;
 using Arda9FileApi.Repositories;
-using Arda9FileApi.Models;
 using Arda9File.Domain.Repositories;
 using Microsoft.Extensions.Logging;
+using Arda9File.Domain.Models;
 
-namespace Arda9FileApi.Application.Files.Queries.GetFilesByBucket;
+namespace Arda9File.Application.Application.Files.Queries.GetFilesByBucket;
 
 public class GetFilesByBucketQuery : IRequest<Result<List<FileMetadataModel>>>
 {

@@ -1,4 +1,4 @@
-namespace Arda9FileApi.Application.Files.Queries.DownloadFile;
+namespace Arda9File.Application.Application.Files.Queries.DownloadFile;
 
 public class DownloadFileResponse
 {

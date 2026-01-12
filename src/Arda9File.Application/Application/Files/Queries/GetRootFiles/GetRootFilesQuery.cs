@@ -1,8 +1,8 @@
 using Ardalis.Result;
 using MediatR;
-using Arda9FileApi.Models;
+using Arda9File.Domain.Models;
 
-namespace Arda9FileApi.Application.Files.Queries.GetRootFiles;
+namespace Arda9File.Application.Application.Files.Queries.GetRootFiles;
 
 public class GetRootFilesQuery : IRequest<Result<List<FileMetadataModel>>>
 {

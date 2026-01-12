@@ -1,6 +1,6 @@
-using Arda9FileApi.Models;
+using Arda9File.Domain.Models;
 
-namespace Arda9FileApi.Application.Buckets.Queries.GetBucketById;
+namespace Arda9File.Application.Application.Buckets.Queries.GetBucketById;
 
 public class GetBucketByIdResponse
 {

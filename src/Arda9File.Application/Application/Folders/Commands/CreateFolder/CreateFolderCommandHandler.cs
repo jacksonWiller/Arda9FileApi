@@ -5,7 +5,7 @@ using Ardalis.Result;
 using MediatR;
 using Microsoft.Extensions.Logging;
 
-namespace Arda9FileApi.Application.Folders.Commands.CreateFolder;
+namespace Arda9File.Application.Application.Folders.Commands.CreateFolder;
 
 public class CreateFolderCommandHandler : IRequestHandler<CreateFolderCommand, Result<CreateFolderResponse>>
 {

@@ -3,7 +3,7 @@ using MediatR;
 using Arda9FileApi.Repositories;
 using Microsoft.Extensions.Logging;
 
-namespace Arda9FileApi.Application.Folders.Commands.DeleteFolder;
+namespace Arda9File.Application.Application.Folders.Commands.DeleteFolder;
 
 public class DeleteFolderCommandHandler : IRequestHandler<DeleteFolderCommand, Result>
 {

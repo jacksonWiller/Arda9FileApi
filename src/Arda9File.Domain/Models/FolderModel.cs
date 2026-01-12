@@ -1,7 +1,7 @@
 using Amazon.DynamoDBv2.DataModel;
 using Arda9FileApi.Core.Infra;
 
-namespace Arda9FileApi.Models;
+namespace Arda9File.Domain.Models;
 
 /// <summary>
 /// DTO for Folder with DynamoDB single table design

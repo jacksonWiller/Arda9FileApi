@@ -1,8 +1,8 @@
 using Ardalis.Result;
 using MediatR;
-using Arda9FileApi.Models;
+using Arda9File.Domain.Models;
 
-namespace Arda9FileApi.Application.Folders.Queries.GetFoldersByBucket;
+namespace Arda9File.Application.Application.Folders.Queries.GetFoldersByBucket;
 
 public class GetFoldersByBucketQuery : IRequest<Result<List<FolderModel>>>
 {
