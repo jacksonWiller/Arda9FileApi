@@ -1,11 +1,12 @@
-using Arda9File.Application.Services;
+using Arda9File.Application.Application.Folders.Commands.CreateFolder;
 using Arda9File.Domain.Models;
 using Arda9File.Domain.Repositories;
+using Arda9File.Application.Services;
 using Ardalis.Result;
-using Ardalis.Result.FluentValidation;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using Ardalis.Result.FluentValidation;
 
 namespace Arda9File.Application.Application.Buckets.Commands.CreateBucket;
 
@@ -16,19 +17,22 @@ public class CreateBucketHandler : IRequestHandler<CreateBucketCommand, Result<C
     private readonly ICurrentUserService _currentUserService;
     private readonly IValidator<CreateBucketCommand> _validator;
     private readonly ILogger<CreateBucketHandler> _logger;
+    private readonly IMediator _mediator;
 
     public CreateBucketHandler(
         IS3Service s3Service,
         IBucketRepository bucketRepository,
         ICurrentUserService currentUserService,
         IValidator<CreateBucketCommand> validator,
-        ILogger<CreateBucketHandler> logger)
+        ILogger<CreateBucketHandler> logger,
+        IMediator mediator)
     {
         _s3Service = s3Service;
         _bucketRepository = bucketRepository;
         _currentUserService = currentUserService;
         _validator = validator;
         _logger = logger;
+        _mediator = mediator;
     }
 
     public async Task<Result<CreateBucketResponse>> Handle(CreateBucketCommand request, CancellationToken cancellationToken)
@@ -108,6 +112,28 @@ public class CreateBucketHandler : IRequestHandler<CreateBucketCommand, Result<C
 
             _logger.LogInformation("Bucket {BucketName} criado com sucesso pelo usuário {UserId} (Público: {IsPublic})", 
                 request.BucketName, userId, request.IsPublic);
+
+            // Criar pasta root automaticamente
+            var createRootFolderCommand = new CreateFolderCommand
+            {
+                FolderName = "root",
+                BucketId = bucketDto.Id,
+                ParentFolderId = null,
+                IsPublic = request.IsPublic,
+                TenantId = tenantId,
+                CreatedBy = Guid.TryParse(userId, out var userGuid) ? userGuid : null
+            };
+
+            var rootFolderResult = await _mediator.Send(createRootFolderCommand, cancellationToken);
+            
+            if (!rootFolderResult.IsSuccess)
+            {
+                _logger.LogWarning("Failed to create root folder for bucket {BucketName}, but bucket was created successfully", request.BucketName);
+            }
+            else
+            {
+                _logger.LogInformation("Root folder created successfully for bucket {BucketName}", request.BucketName);
+            }
 
             return Result<CreateBucketResponse>.Success(new CreateBucketResponse
             {

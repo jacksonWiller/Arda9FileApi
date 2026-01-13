@@ -1,5 +1,6 @@
 using Amazon.S3;
 using Amazon.S3.Model;
+using Arda9File.Application.Application.Buckets.Commands.CreateBucket;
 using Arda9File.Application.Application.Buckets.Commands.DeleteBucket;
 using Arda9File.Domain.Repositories;
 using Arda9FileApi.Application.Buckets.Commands.CreateBucket;
@@ -55,9 +56,9 @@ public class DeleteBucketHandler : IRequestHandler<DeleteBucketCommand, Result>
             // Deletar registro do DynamoDB
             await _bucketRepository.DeleteAsync(bucket.Id);
 
-            _logger.LogInformation("Bucket {BucketName} deletado com sucesso", request.BucketName);
+            _logger.LogInformation($"Bucket {request.BucketName} deletado com sucesso");
 
-            return Result.Success();
+            return Result.SuccessWithMessage($"Bucket {request.BucketName} deletado com sucesso");
         }
         catch (AmazonS3Exception ex) when (ex.ErrorCode == "NoSuchBucket")
         {
