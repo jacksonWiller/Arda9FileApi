@@ -1,8 +1,8 @@
 using Arda9File.Application.Application.Buckets.Commands.DeleteBucket;
-using Arda9File.Application.Services;
 using Arda9File.Domain.Models;
 using Arda9File.Domain.Repositories;
 using Arda9FileApi.Application.Buckets.Commands.DeleteBucket;
+using Amazon.S3;
 using FluentAssertions;
 using FluentValidation;
 using FluentValidation.Results;
@@ -13,7 +13,7 @@ namespace Arda9File.UnitTest.Buckets.Commands;
 
 public class DeleteBucketHandlerTests
 {
-    private readonly Mock<IS3Service> _s3ServiceMock;
+    private readonly Mock<IAmazonS3> _s3ClientMock;
     private readonly Mock<IBucketRepository> _bucketRepositoryMock;
     private readonly Mock<IValidator<DeleteBucketCommand>> _validatorMock;
     private readonly Mock<ILogger<DeleteBucketHandler>> _loggerMock;
@@ -21,13 +21,13 @@ public class DeleteBucketHandlerTests
 
     public DeleteBucketHandlerTests()
     {
-        _s3ServiceMock = new Mock<IS3Service>();
+        _s3ClientMock = new Mock<IAmazonS3>();
         _bucketRepositoryMock = new Mock<IBucketRepository>();
         _validatorMock = new Mock<IValidator<DeleteBucketCommand>>();
         _loggerMock = new Mock<ILogger<DeleteBucketHandler>>();
 
         _handler = new DeleteBucketHandler(
-            _s3ServiceMock.Object,
+            _s3ClientMock.Object,
             _bucketRepositoryMock.Object,
             _validatorMock.Object,
             _loggerMock.Object
@@ -38,19 +38,17 @@ public class DeleteBucketHandlerTests
     public async Task Handle_WithValidBucket_ShouldDeleteSuccessfully()
     {
         // Arrange
-        var tenantId = Guid.NewGuid();
         var bucketName = "test-bucket";
         var command = new DeleteBucketCommand
         {
-            BucketName = bucketName,
-            TenantId = tenantId
+            BucketName = bucketName
         };
 
         var bucket = new BucketModel
         {
             Id = Guid.NewGuid(),
             BucketName = bucketName,
-            CompanyId = tenantId
+            CompanyId = Guid.NewGuid()
         };
 
         _validatorMock.Setup(v => v.ValidateAsync(command, default))
@@ -58,9 +56,6 @@ public class DeleteBucketHandlerTests
 
         _bucketRepositoryMock.Setup(r => r.GetByBucketNameAsync(bucketName))
             .ReturnsAsync(bucket);
-
-        _s3ServiceMock.Setup(s => s.DeleteBucketAsync(bucketName, default))
-            .ReturnsAsync(true);
 
         _bucketRepositoryMock.Setup(r => r.DeleteAsync(bucket.Id))
             .Returns(Task.CompletedTask);
@@ -71,7 +66,6 @@ public class DeleteBucketHandlerTests
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeTrue();
-        _s3ServiceMock.Verify(s => s.DeleteBucketAsync(bucketName, default), Times.Once);
         _bucketRepositoryMock.Verify(r => r.DeleteAsync(bucket.Id), Times.Once);
     }
 
@@ -81,8 +75,7 @@ public class DeleteBucketHandlerTests
         // Arrange
         var command = new DeleteBucketCommand
         {
-            BucketName = "",
-            TenantId = Guid.NewGuid()
+            BucketName = ""
         };
 
         var validationResult = new ValidationResult(new[]
@@ -99,6 +92,7 @@ public class DeleteBucketHandlerTests
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
+        result.Status.Should().Be(Ardalis.Result.ResultStatus.Invalid);
         _bucketRepositoryMock.Verify(r => r.DeleteAsync(It.IsAny<Guid>()), Times.Never);
     }
 
@@ -108,8 +102,7 @@ public class DeleteBucketHandlerTests
         // Arrange
         var command = new DeleteBucketCommand
         {
-            BucketName = "non-existent-bucket",
-            TenantId = Guid.NewGuid()
+            BucketName = "non-existent-bucket"
         };
 
         _validatorMock.Setup(v => v.ValidateAsync(command, default))
@@ -125,70 +118,24 @@ public class DeleteBucketHandlerTests
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
         result.Status.Should().Be(Ardalis.Result.ResultStatus.NotFound);
-        _s3ServiceMock.Verify(s => s.DeleteBucketAsync(It.IsAny<string>(), default), Times.Never);
+        _bucketRepositoryMock.Verify(r => r.DeleteAsync(It.IsAny<Guid>()), Times.Never);
     }
 
     [Fact]
-    public async Task Handle_WhenBucketNotBelongsToTenant_ShouldReturnForbidden()
+    public async Task Handle_WhenExceptionOccurs_ShouldReturnError()
     {
         // Arrange
-        var tenantId = Guid.NewGuid();
-        var command = new DeleteBucketCommand
-        {
-            BucketName = "test-bucket",
-            TenantId = tenantId
-        };
-
-        var bucket = new BucketModel
-        {
-            Id = Guid.NewGuid(),
-            BucketName = command.BucketName,
-            CompanyId = Guid.NewGuid() // Different tenant
-        };
-
-        _validatorMock.Setup(v => v.ValidateAsync(command, default))
-            .ReturnsAsync(new ValidationResult());
-
-        _bucketRepositoryMock.Setup(r => r.GetByBucketNameAsync(command.BucketName))
-            .ReturnsAsync(bucket);
-
-        // Act
-        var result = await _handler.Handle(command, default);
-
-        // Assert
-        result.Should().NotBeNull();
-        result.IsSuccess.Should().BeFalse();
-        result.Status.Should().Be(Ardalis.Result.ResultStatus.Forbidden);
-        _s3ServiceMock.Verify(s => s.DeleteBucketAsync(It.IsAny<string>(), default), Times.Never);
-    }
-
-    [Fact]
-    public async Task Handle_WhenS3DeletionFails_ShouldReturnError()
-    {
-        // Arrange
-        var tenantId = Guid.NewGuid();
         var bucketName = "test-bucket";
         var command = new DeleteBucketCommand
         {
-            BucketName = bucketName,
-            TenantId = tenantId
-        };
-
-        var bucket = new BucketModel
-        {
-            Id = Guid.NewGuid(),
-            BucketName = bucketName,
-            CompanyId = tenantId
+            BucketName = bucketName
         };
 
         _validatorMock.Setup(v => v.ValidateAsync(command, default))
             .ReturnsAsync(new ValidationResult());
 
         _bucketRepositoryMock.Setup(r => r.GetByBucketNameAsync(bucketName))
-            .ReturnsAsync(bucket);
-
-        _s3ServiceMock.Setup(s => s.DeleteBucketAsync(bucketName, default))
-            .ReturnsAsync(false);
+            .ThrowsAsync(new Exception("Database error"));
 
         // Act
         var result = await _handler.Handle(command, default);
@@ -196,6 +143,6 @@ public class DeleteBucketHandlerTests
         // Assert
         result.Should().NotBeNull();
         result.IsSuccess.Should().BeFalse();
-        _bucketRepositoryMock.Verify(r => r.DeleteAsync(It.IsAny<Guid>()), Times.Never);
+        result.Status.Should().Be(Ardalis.Result.ResultStatus.Error);
     }
 }
