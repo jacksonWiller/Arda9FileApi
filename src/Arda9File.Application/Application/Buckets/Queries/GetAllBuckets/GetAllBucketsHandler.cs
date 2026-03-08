@@ -62,7 +62,7 @@ public class GetAllBucketsHandler : IRequestHandler<GetAllBucketsQuery, Result<G
         catch (Exception ex)
         {
             _logger.LogError(ex, "Erro ao buscar buckets do S3");
-            return Result<GetAllBucketsResponse>.Error(ex.Message);
+            return Result.Error(ex.Message);
         }
     }
 
