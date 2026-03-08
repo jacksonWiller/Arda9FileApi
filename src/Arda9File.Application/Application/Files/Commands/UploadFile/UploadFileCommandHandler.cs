@@ -8,6 +8,7 @@ using Ardalis.Result;
 using FluentValidation;
 using MediatR;
 using Microsoft.Extensions.Logging;
+using System.Xml.Schema;
 
 namespace Arda9File.Application.Application.Files.Commands.UploadFile;
 
@@ -59,7 +60,7 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
             var bucket = await _bucketRepository.GetByIdAsync(request.BucketId);
             if (bucket == null)
             {
-                _logger.LogWarning("Bucket {BucketId} not found for company {CompanyId}", request.BucketId, request.TenantId);
+                _logger.LogWarning("Bucket {BucketId}", request.BucketId);
                 return Result<UploadFileResponse>.Error();
             }
 
@@ -108,7 +109,7 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
                 s3Key,
                 request.File.OpenReadStream(),
                 request.File.ContentType,
-                request.IsPublic,
+                request.IsPublic.HasValue ? request.IsPublic.Value : true,
                 cancellationToken
             );
 
@@ -120,7 +121,7 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
 
             // Obter URL pública se o arquivo for público
             string? publicUrl = null;
-            if (request.IsPublic)
+            if (request.IsPublic.HasValue && request.IsPublic.Value)
             {
                 publicUrl = await _s3Service.GetPublicUrlAsync(bucket.BucketName, s3Key);
                 _logger.LogInformation("Public URL generated for file: {PublicUrl}", publicUrl);
@@ -139,9 +140,8 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
                 Size = request.File.Length,
                 FolderId = request.FolderId,
                 Folder = folderPath,
-                CompanyId = request.TenantId,
                 UploadedBy = userId, 
-                IsPublic = request.IsPublic,
+                IsPublic = request.IsPublic.HasValue ? request.IsPublic.Value : true,
                 PublicUrl = publicUrl,
                 CreatedAt = DateTime.UtcNow,
                 IsDeleted = false

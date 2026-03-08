@@ -50,15 +50,14 @@ public class FilesController : ControllerBase
     /// <summary>
     /// Faz upload de um arquivo
     /// </summary>
-    [HttpPost("{tenantId}")]
+    [HttpPost()]
     [Consumes(MediaTypeNames.Multipart.FormData)]
     [Produces(MediaTypeNames.Application.Json)]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> UploadFileAsync(Guid tenantId, [FromForm] UploadFileCommand command)
+    public async Task<IActionResult> UploadFileAsync([FromForm] UploadFileCommand command)
     {
-        command.TenantId = tenantId;
         var result = await _mediator.Send(command);
         
         if (result.IsSuccess)
