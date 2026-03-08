@@ -30,7 +30,7 @@ public class GetAllBucketsHandler : IRequestHandler<GetAllBucketsQuery, Result<G
     {
         try
         {
-            // Buscar todos os buckets do S3
+            // Buscar todos os buckets do S3d
             var s3Response = await _s3Client.ListBucketsAsync(cancellationToken);
 
             // Buscar metadados do DynamoDB
@@ -62,7 +62,7 @@ public class GetAllBucketsHandler : IRequestHandler<GetAllBucketsQuery, Result<G
         catch (Exception ex)
         {
             _logger.LogError(ex, "Erro ao buscar buckets do S3");
-            return Result<GetAllBucketsResponse>.Error();
+            return Result<GetAllBucketsResponse>.Error(ex.Message);
         }
     }
 
