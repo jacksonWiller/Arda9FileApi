@@ -24,6 +24,52 @@ Resources:
         # Give Create/Read/Update/Delete Permissions to the SampleTable
         - DynamoDBCrudPolicy:
             TableName: !Ref SampleTable
+        # Permissões S3 para listar todos os buckets
+        - Statement:
+            - Sid: S3ListAllBuckets
+              Effect: Allow
+              Action:
+                - s3:ListAllMyBuckets
+                - s3:GetBucketLocation
+              Resource: '*'
+        # Permissões S3 para operações em buckets específicos
+        - Statement:
+            - Sid: S3BucketOperations
+              Effect: Allow
+              Action:
+                - s3:CreateBucket
+                - s3:DeleteBucket
+                - s3:ListBucket
+                - s3:GetBucketVersioning
+                - s3:PutBucketVersioning
+                - s3:GetBucketPolicy
+                - s3:PutBucketPolicy
+                - s3:DeleteBucketPolicy
+                - s3:GetBucketAcl
+                - s3:PutBucketAcl
+                - s3:GetBucketCORS
+                - s3:PutBucketCORS
+                - s3:DeleteBucketCORS
+                - s3:PutBucketPublicAccessBlock
+                - s3:GetBucketPublicAccessBlock
+              Resource: 
+                - 'arn:aws:s3:::*'
+        # Permissões S3 para operações em objetos
+        - Statement:
+            - Sid: S3ObjectOperations
+              Effect: Allow
+              Action:
+                - s3:GetObject
+                - s3:PutObject
+                - s3:DeleteObject
+                - s3:GetObjectAcl
+                - s3:PutObjectAcl
+                - s3:GetObjectVersion
+                - s3:DeleteObjectVersion
+                - s3:ListMultipartUploadParts
+                - s3:AbortMultipartUpload
+              Resource: 
+                - 'arn:aws:s3:::*/*'
       Events:
         ProxyResource:
           Type: HttpApi
