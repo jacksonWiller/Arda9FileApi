@@ -18,9 +18,5 @@ public class CreateFolderCommandValidator : AbstractValidator<CreateFolderComman
             .NotEmpty()
             .WithMessage("BucketId is required");
 
-            RuleFor(x => x.TenantId)
-        .NotEmpty()
-            .WithMessage("CompanyId is required");
-
     }
 }

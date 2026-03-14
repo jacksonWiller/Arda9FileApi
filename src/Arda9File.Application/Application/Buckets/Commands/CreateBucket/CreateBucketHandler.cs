@@ -47,8 +47,7 @@ public class CreateBucketHandler : IRequestHandler<CreateBucketCommand, Result<C
             }
 
             // Extrair TenantId e UserId do token JWT
-            //var tenantId = _currentUserService.GetTenantId();
-            var tenantId = request.TenantId;
+            var tenantId = _currentUserService.GetTenantId();
             if (tenantId == Guid.Empty)
             {
                 _logger.LogWarning("TenantId not found in token");
@@ -100,7 +99,7 @@ public class CreateBucketHandler : IRequestHandler<CreateBucketCommand, Result<C
             {
                 Id = Guid.NewGuid(),
                 BucketName = request.BucketName,
-                CompanyId = tenantId,
+                TenantId = tenantId,
                 Region = "us-east-1",
                 Status = "Active",
                 CreatedAt = DateTime.UtcNow,
@@ -120,8 +119,6 @@ public class CreateBucketHandler : IRequestHandler<CreateBucketCommand, Result<C
                 BucketId = bucketDto.Id,
                 ParentFolderId = null,
                 IsPublic = request.IsPublic,
-                TenantId = tenantId,
-                CreatedBy = Guid.TryParse(userId, out var userGuid) ? userGuid : null
             };
 
             var rootFolderResult = await _mediator.Send(createRootFolderCommand, cancellationToken);

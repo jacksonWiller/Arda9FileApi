@@ -34,7 +34,7 @@ public class GetFilesByFolderQueryHandler : IRequestHandler<GetFilesByFolderQuer
                 return Result<List<FileMetadataModel>>.NotFound();
             }
 
-            if (folder.CompanyId != request.TenantId)
+            if (folder.TenantId != request.TenantId)
             {
                 _logger.LogWarning("Folder {FolderId} does not belong to tenant {TenantId}", 
                     request.FolderId, request.TenantId);

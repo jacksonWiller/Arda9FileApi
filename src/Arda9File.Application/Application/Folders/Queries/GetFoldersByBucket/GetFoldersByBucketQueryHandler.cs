@@ -34,7 +34,7 @@ public class GetFoldersByBucketQueryHandler : IRequestHandler<GetFoldersByBucket
                 return Result<List<FolderModel>>.NotFound();
             }
 
-            if (bucket.CompanyId != request.TenantId)
+            if (bucket.TenantId != request.TenantId)
             {
                 _logger.LogWarning("Bucket {BucketId} does not belong to tenant {TenantId}", 
                     request.BucketId, request.TenantId);

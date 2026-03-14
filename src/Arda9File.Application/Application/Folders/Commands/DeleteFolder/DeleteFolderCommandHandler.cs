@@ -1,5 +1,6 @@
 using Ardalis.Result;
 using MediatR;
+using Arda9File.Application.Services;
 using Arda9FileApi.Repositories;
 using Microsoft.Extensions.Logging;
 
@@ -8,13 +9,16 @@ namespace Arda9File.Application.Application.Folders.Commands.DeleteFolder;
 public class DeleteFolderCommandHandler : IRequestHandler<DeleteFolderCommand, Result>
 {
     private readonly IFolderRepository _repository;
+    private readonly ICurrentUserService _currentUserService;
     private readonly ILogger<DeleteFolderCommandHandler> _logger;
 
     public DeleteFolderCommandHandler(
         IFolderRepository repository,
+        ICurrentUserService currentUserService,
         ILogger<DeleteFolderCommandHandler> logger)
     {
         _repository = repository;
+        _currentUserService = currentUserService;
         _logger = logger;
     }
 
@@ -22,6 +26,21 @@ public class DeleteFolderCommandHandler : IRequestHandler<DeleteFolderCommand, R
     {
         try
         {
+            // Extrair TenantId e UserId do token JWT
+            var tenantId = _currentUserService.GetTenantId();
+            if (tenantId == Guid.Empty)
+            {
+                _logger.LogWarning("TenantId not found in token");
+                return Result.Error("TenantId not found in token");
+            }
+
+            var userId = _currentUserService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("UserId not found in token");
+                return Result.Error("UserId not found in token");
+            }
+
             var folder = await _repository.GetByIdAsync(request.FolderId);
             if (folder == null || folder.IsDeleted)
             {
@@ -30,10 +49,10 @@ public class DeleteFolderCommandHandler : IRequestHandler<DeleteFolderCommand, R
             }
 
             // Verificar se a pasta pertence ao tenant
-            if (folder.CompanyId != request.TenantId)
+            if (folder.TenantId != tenantId)
             {
                 _logger.LogWarning("Folder {FolderId} does not belong to tenant {TenantId}", 
-                    request.FolderId, request.TenantId);
+                    request.FolderId, tenantId);
                 return Result.Forbidden();
             }
 

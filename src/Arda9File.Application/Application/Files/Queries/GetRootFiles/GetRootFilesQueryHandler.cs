@@ -35,7 +35,7 @@ public class GetRootFilesQueryHandler : IRequestHandler<GetRootFilesQuery, Resul
                 return Result<List<FileMetadataModel>>.NotFound("Bucket não encontrado");
             }
 
-            if (bucket.CompanyId != request.TenantId)
+            if (bucket.TenantId != request.TenantId)
             {
                 _logger.LogWarning("Bucket {BucketId} does not belong to tenant {TenantId}", 
                     request.BucketId, request.TenantId);

@@ -8,7 +8,7 @@ public interface IFolderRepository
     Task<FolderModel?> GetByPathAndNameAsync(Guid bucketId, string path, string folderName);
     Task<List<FolderModel>> GetByBucketIdAsync(Guid bucketId);
     Task<List<FolderModel>> GetByParentFolderIdAsync(Guid parentFolderId);
-    Task<List<FolderModel>> GetByCompanyIdAsync(Guid companyId);
+    Task<List<FolderModel>> GetByTenantIdAsync(Guid tenantId);
     Task CreateAsync(FolderModel folder);
     Task UpdateAsync(FolderModel folder);
     Task DeleteAsync(Guid folderId);

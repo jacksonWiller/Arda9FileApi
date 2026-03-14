@@ -36,14 +36,14 @@ public class GetFoldersQueryHandler : IRequestHandler<GetFoldersQuery, Result<Ge
                 // Get folders by parent
                 var parentFolders = await _folderRepository.GetByParentFolderIdAsync(request.ParentId.Value);
                 folders = await BuildFolderTree(
-                    parentFolders.Where(f => !f.IsDeleted && f.CompanyId == request.TenantId).ToList(),
+                    parentFolders.Where(f => !f.IsDeleted && f.TenantId == request.TenantId).ToList(),
                     depth,
                     request.IncludeEmpty);
             }
             else
             {
                 // Get root folders (folders with no parent)
-                var allFolders = await _folderRepository.GetByCompanyIdAsync(request.TenantId);
+                var allFolders = await _folderRepository.GetByTenantIdAsync(request.TenantId);
                 var rootFolders = allFolders.Where(f => !f.IsDeleted && !f.ParentFolderId.HasValue).ToList();
                 folders = await BuildFolderTree(rootFolders, depth, request.IncludeEmpty);
             }

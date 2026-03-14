@@ -1,8 +1,10 @@
+using Arda9File.Application.Application.Buckets.Commands.CreateBucket;
+using Arda9File.Application.Services;
+using Arda9FileApi.Repositories;
 using Ardalis.Result;
 using MediatR;
-using Arda9FileApi.Repositories;
 using Microsoft.Extensions.Logging;
-using Arda9File.Application.Services;
+using Newtonsoft.Json.Linq;
 
 namespace Arda9File.Application.Application.Files.Commands.DeleteFile;
 
@@ -10,15 +12,19 @@ public class DeleteFileCommandHandler : IRequestHandler<DeleteFileCommand, Resul
 {
     private readonly IFileRepository _repository;
     private readonly IS3Service _s3Service;
+    private readonly ICurrentUserService _currentUserService;
     private readonly ILogger<DeleteFileCommandHandler> _logger;
+
 
     public DeleteFileCommandHandler(
         IFileRepository repository,
         IS3Service s3Service,
+        ICurrentUserService currentUserService,
         ILogger<DeleteFileCommandHandler> logger)
     {
         _repository = repository;
         _s3Service = s3Service;
+        _currentUserService = currentUserService;
         _logger = logger;
     }
 
@@ -33,11 +39,19 @@ public class DeleteFileCommandHandler : IRequestHandler<DeleteFileCommand, Resul
                 return Result.NotFound();
             }
 
-            if (file.CompanyId != request.TenantId)
+            // Extrair TenantId e UserId do token JWT
+            var tenantId = _currentUserService.GetTenantId();
+            if (tenantId == Guid.Empty)
             {
-                _logger.LogWarning("File {FileId} does not belong to tenant {TenantId}", 
-                    request.FileId, request.TenantId);
-                return Result.Forbidden();
+                _logger.LogWarning("TenantId not found in token");
+                return Result.Error("TenantId not found in token");
+            }
+
+            var userId = _currentUserService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("UserId not found in token");
+                return Result.Error("UserId not found in token");
             }
 
             if (request.HardDelete)

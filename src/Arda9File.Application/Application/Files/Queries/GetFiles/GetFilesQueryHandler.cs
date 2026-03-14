@@ -28,7 +28,7 @@ public class GetFilesQueryHandler : IRequestHandler<GetFilesQuery, Result<GetFil
         try
         {
             // Get all files for company
-            var allFiles = await _fileRepository.GetByCompanyIdAsync(request.TenantId);
+            var allFiles = await _fileRepository.GetByTenantIdAsync(request.TenantId);
             
             // Apply filters
             var filteredFiles = allFiles.Where(f => !f.IsDeleted).AsQueryable();

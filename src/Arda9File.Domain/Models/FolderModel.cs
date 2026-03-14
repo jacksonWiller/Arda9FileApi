@@ -35,7 +35,7 @@ public class FolderModel : DynamoSingleTableEntity
     public Guid? ParentFolderId { get; set; }
 
     [DynamoDBProperty("CompanyId")]
-    public Guid CompanyId { get; set; }
+    public Guid TenantId { get; set; }
 
     [DynamoDBProperty("CreatedBy")]
     public Guid? CreatedBy { get; set; }

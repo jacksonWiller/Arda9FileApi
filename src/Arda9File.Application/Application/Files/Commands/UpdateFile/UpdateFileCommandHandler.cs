@@ -11,17 +11,20 @@ public class UpdateFileCommandHandler : IRequestHandler<UpdateFileCommand, Resul
     private readonly IFileRepository _repository;
     private readonly IFolderRepository _folderRepository;
     private readonly IS3Service _s3Service;
+    private readonly ICurrentUserService _currentUserService;
     private readonly ILogger<UpdateFileCommandHandler> _logger;
 
     public UpdateFileCommandHandler(
         IFileRepository repository,
         IFolderRepository folderRepository,
         IS3Service s3Service,
+        ICurrentUserService currentUserService,
         ILogger<UpdateFileCommandHandler> logger)
     {
         _repository = repository;
         _folderRepository = folderRepository;
         _s3Service = s3Service;
+        _currentUserService = currentUserService;
         _logger = logger;
     }
 
@@ -29,6 +32,21 @@ public class UpdateFileCommandHandler : IRequestHandler<UpdateFileCommand, Resul
     {
         try
         {
+            // Extrair TenantId e UserId do token JWT
+            var tenantId = _currentUserService.GetTenantId();
+            if (tenantId == Guid.Empty)
+            {
+                _logger.LogWarning("TenantId not found in token");
+                return Result<UpdateFileResponse>.Error("TenantId not found in token");
+            }
+
+            var userId = _currentUserService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("UserId not found in token");
+                return Result<UpdateFileResponse>.Error("UserId not found in token");
+            }
+
             var file = await _repository.GetByIdAsync(request.FileId);
             if (file == null || file.IsDeleted)
             {
@@ -36,10 +54,10 @@ public class UpdateFileCommandHandler : IRequestHandler<UpdateFileCommand, Resul
                 return Result<UpdateFileResponse>.NotFound();
             }
 
-            if (file.CompanyId != request.TenantId)
+            if (file.TenantId != tenantId)
             {
                 _logger.LogWarning("File {FileId} does not belong to tenant {TenantId}", 
-                    request.FileId, request.TenantId);
+                    request.FileId, tenantId);
                 return Result<UpdateFileResponse>.Forbidden();
             }
 
@@ -51,31 +69,6 @@ public class UpdateFileCommandHandler : IRequestHandler<UpdateFileCommand, Resul
             {
                 var sanitizedFileName = _s3Service.SanitizeFileName(request.FileName);
                 file.FileName = sanitizedFileName;
-                needsS3Update = true;
-            }
-
-            // Atualizar pasta se fornecido
-            if (request.FolderId.HasValue)
-            {
-                var folder = await _folderRepository.GetByIdAsync(request.FolderId.Value);
-                if (folder == null || folder.IsDeleted)
-                {
-                    _logger.LogWarning("Folder {FolderId} not found", request.FolderId);
-                    return Result<UpdateFileResponse>.Error();
-                }
-
-                if (folder.CompanyId != request.TenantId)
-                {
-                    _logger.LogWarning("Folder {FolderId} does not belong to tenant {TenantId}", 
-                        request.FolderId, request.TenantId);
-                    return Result<UpdateFileResponse>.Forbidden();
-                }
-
-                var newFolderPath = string.IsNullOrEmpty(folder.Path) 
-                    ? folder.FolderName 
-                    : $"{folder.Path}/{folder.FolderName}";
-
-                file.Folder = newFolderPath;
                 needsS3Update = true;
             }
 

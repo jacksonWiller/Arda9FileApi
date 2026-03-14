@@ -37,7 +37,7 @@ public class FilesController : ControllerBase
     /// <summary>
     /// Lista arquivos do usuário com filtros e paginação
     /// </summary>
-    [HttpGet("{tenantId}")]
+    [HttpGet()]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -71,13 +71,13 @@ public class FilesController : ControllerBase
     /// <summary>
     /// Obtém um arquivo por ID
     /// </summary>
-    [HttpGet("{tenantId}/{fileId}")]
+    [HttpGet("{fileId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetFileById(Guid tenantId, Guid fileId)
+    public async Task<IActionResult> GetFileById(Guid fileId)
     {
-        var query = new GetFileByIdQuery { TenantId = tenantId, FileId = fileId };
+        var query = new GetFileByIdQuery { FileId = fileId };
         var result = await _mediator.Send(query);
         return result.ToActionResult();
     }
@@ -85,12 +85,12 @@ public class FilesController : ControllerBase
     /// <summary>
     /// Obtém todos os arquivos de um bucket
     /// </summary>
-    [HttpGet("{tenantId}/bucket/{bucketId}")]
+    [HttpGet("bucket/{bucketId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetFilesByBucket(Guid tenantId, Guid bucketId)
+    public async Task<IActionResult> GetFilesByBucket(Guid bucketId)
     {
-        var query = new GetFilesByBucketQuery { TenantId = tenantId, BucketId = bucketId };
+        var query = new GetFilesByBucketQuery { BucketId = bucketId };
         var result = await _mediator.Send(query);
         return result.ToActionResult();
     }
@@ -98,14 +98,14 @@ public class FilesController : ControllerBase
     /// <summary>
     /// Obtém todos os arquivos da pasta raiz (sem pasta pai)
     /// </summary>
-    [HttpGet("{tenantId}/bucket/{bucketId}/root")]
+    [HttpGet("bucket/{bucketId}/root")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> GetRootFiles(Guid tenantId, Guid bucketId)
+    public async Task<IActionResult> GetRootFiles(Guid bucketId)
     {
-        var query = new GetRootFilesQuery { TenantId = tenantId, BucketId = bucketId };
+        var query = new GetRootFilesQuery { BucketId = bucketId };
         var result = await _mediator.Send(query);
         return result.ToActionResult();
     }
@@ -113,12 +113,12 @@ public class FilesController : ControllerBase
     /// <summary>
     /// Obtém todos os arquivos de uma pasta
     /// </summary>
-    [HttpGet("{tenantId}/folder/{folderId}")]
+    [HttpGet("folder/{folderId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetFilesByFolder(Guid tenantId, Guid folderId)
     {
-        var query = new GetFilesByFolderQuery { TenantId = tenantId, FolderId = folderId };
+        var query = new GetFilesByFolderQuery { FolderId = folderId };
         var result = await _mediator.Send(query);
         return result.ToActionResult();
     }
@@ -126,13 +126,13 @@ public class FilesController : ControllerBase
     /// <summary>
     /// Faz download de um arquivo
     /// </summary>
-    [HttpGet("{tenantId}/{fileId}/download")]
+    [HttpGet("{fileId}/download")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> DownloadFile(Guid tenantId, Guid fileId)
     {
-        var query = new DownloadFileQuery { TenantId = tenantId, FileId = fileId };
+        var query = new DownloadFileQuery { FileId = fileId };
         var result = await _mediator.Send(query);
         
         if (!result.IsSuccess)
@@ -146,7 +146,7 @@ public class FilesController : ControllerBase
     /// <summary>
     /// Retorna URL assinada para download
     /// </summary>
-    [HttpGet("{tenantId}/{fileId}/download-url")]
+    [HttpGet("{fileId}/download-url")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -166,14 +166,13 @@ public class FilesController : ControllerBase
     /// <summary>
     /// Atualiza os metadados de um arquivo
     /// </summary>
-    [HttpPatch("{tenantId}/{fileId}")]
+    [HttpPatch("{fileId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> UpdateFile(Guid tenantId, Guid fileId, [FromBody] UpdateFileCommand command)
     {
-        command.TenantId = tenantId;
         command.FileId = fileId;
         var result = await _mediator.Send(command);
         return result.ToActionResult();
@@ -182,13 +181,13 @@ public class FilesController : ControllerBase
     /// <summary>
     /// Move arquivo para lixeira (soft delete)
     /// </summary>
-    [HttpDelete("{tenantId}/{fileId}")]
+    [HttpDelete("{fileId}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> DeleteFile(Guid tenantId, Guid fileId, [FromQuery] bool permanent = false)
     {
-        var command = new DeleteFileCommand { TenantId = tenantId, FileId = fileId };
+        var command = new DeleteFileCommand { FileId = fileId };
         var result = await _mediator.Send(command);
         return result.ToActionResult();
     }
@@ -196,13 +195,13 @@ public class FilesController : ControllerBase
     /// <summary>
     /// Restaura arquivo da lixeira
     /// </summary>
-    [HttpPost("{tenantId}/{fileId}/restore")]
+    [HttpPost("{fileId}/restore")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> RestoreFile(Guid tenantId, Guid fileId)
     {
-        var command = new RestoreFileCommand { TenantId = tenantId, FileId = fileId };
+        var command = new RestoreFileCommand { FileId = fileId };
         var result = await _mediator.Send(command);
         return result.ToActionResult();
     }
@@ -210,13 +209,12 @@ public class FilesController : ControllerBase
     /// <summary>
     /// Cria uma cópia do arquivo
     /// </summary>
-    [HttpPost("{tenantId}/{fileId}/duplicate")]
+    [HttpPost("{fileId}/duplicate")]
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> DuplicateFile(Guid tenantId, Guid fileId, [FromBody] DuplicateFileCommand command)
+    public async Task<IActionResult> DuplicateFile(Guid fileId, [FromBody] DuplicateFileCommand command)
     {
-        command.TenantId = tenantId;
         command.FileId = fileId;
         var result = await _mediator.Send(command);
         
@@ -231,13 +229,12 @@ public class FilesController : ControllerBase
     /// <summary>
     /// Move arquivo para outra pasta
     /// </summary>
-    [HttpPost("{tenantId}/{fileId}/move")]
+    [HttpPost("{fileId}/move")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> MoveFile(Guid tenantId, Guid fileId, [FromBody] MoveFileCommand command)
+    public async Task<IActionResult> MoveFile(Guid fileId, [FromBody] MoveFileCommand command)
     {
-        command.TenantId = tenantId;
         command.FileId = fileId;
         var result = await _mediator.Send(command);
         return result.ToActionResult();

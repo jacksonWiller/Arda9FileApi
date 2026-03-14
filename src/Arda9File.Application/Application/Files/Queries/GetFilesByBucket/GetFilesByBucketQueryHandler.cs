@@ -40,7 +40,7 @@ public class GetFilesByBucketQueryHandler : IRequestHandler<GetFilesByBucketQuer
                 return Result<List<FileMetadataModel>>.NotFound();
             }
 
-            if (bucket.CompanyId != request.TenantId)
+            if (bucket.TenantId != request.TenantId)
             {
                 _logger.LogWarning("Bucket {BucketName} does not belong to tenant {TenantId}", 
                     request.BucketId, request.TenantId);

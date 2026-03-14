@@ -12,9 +12,4 @@ public class UpdateFolderCommand : IRequest<Result<UpdateFolderResponse>>
     public string? FolderName { get; set; }
     public bool? IsPublic { get; set; }
 
-    [JsonIgnore]
-    public Guid TenantId { get; set; }
-
-    [JsonIgnore]
-    public Guid? UpdatedBy { get; set; }
 }

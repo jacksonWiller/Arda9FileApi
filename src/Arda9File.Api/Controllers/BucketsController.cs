@@ -31,14 +31,13 @@ public class BucketsController : ControllerBase
     /// <response code="200">Bucket criado com sucesso</response>
     /// <response code="400">Parâmetros inválidos</response>
     /// <response code="500">Erro interno</response>
-    [HttpPost("{tenantId}")]
+    [HttpPost()]
     [Consumes(MediaTypeNames.Application.Json)]
     [ProducesResponseType(typeof(CreateBucketResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> CreateBucketAsync(Guid tenantId, [FromBody] CreateBucketCommand command)
+    public async Task<IActionResult> CreateBucketAsync([FromBody] CreateBucketCommand command)
     {
-        command.TenantId = tenantId;
         var result = await _mediator.Send(command);
         return result.ToActionResult();
     }
@@ -50,7 +49,7 @@ public class BucketsController : ControllerBase
     /// <returns>Lista de buckets</returns>
     /// <response code="200">Buckets encontrados</response>
     /// <response code="500">Erro interno</response>
-    [HttpGet]
+    [HttpGet()]
     [ProducesResponseType(typeof(GetAllBucketsResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetAllBucketsAsync([FromQuery] GetAllBucketsQuery query)

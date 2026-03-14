@@ -50,6 +50,8 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
         {
             // Obter ID do usuário autenticado
             var userId = _currentUserService.GetUserId();
+            var tenantId = _currentUserService.GetTenantId();
+
             if (string.IsNullOrEmpty(userId))
             {
                 _logger.LogWarning("UserId not found in token");
@@ -139,6 +141,7 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, Resul
                 ContentType = request.File.ContentType,
                 Size = request.File.Length,
                 FolderId = request.FolderId,
+                TenantId = tenantId, 
                 Folder = folderPath,
                 UploadedBy = userId, 
                 IsPublic = request.IsPublic.HasValue ? request.IsPublic.Value : true,

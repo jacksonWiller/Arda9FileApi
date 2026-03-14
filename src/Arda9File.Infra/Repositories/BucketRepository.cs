@@ -68,7 +68,7 @@ public class BucketRepository : IBucketRepository
         }
     }
 
-    public async Task<List<BucketModel>> GetByCompanyIdAsync(Guid companyId)
+    public async Task<List<BucketModel>> GetByTenantIdAsync(Guid companyId)
     {
         try
         {
@@ -117,7 +117,7 @@ public class BucketRepository : IBucketRepository
             bucket.PK = $"BUCKET#{bucket.Id}";
             bucket.SK = "METADATA";
             bucket.EntityType = "BUCKET";
-            bucket.GSI3PK = $"COMPANY#{bucket.CompanyId}";
+            bucket.GSI3PK = $"COMPANY#{bucket.TenantId}";
             
             await _context.SaveAsync(bucket);
             
@@ -139,7 +139,7 @@ public class BucketRepository : IBucketRepository
             bucket.PK = $"BUCKET#{bucket.Id}";
             bucket.SK = "METADATA";
             bucket.EntityType = "BUCKET";
-            bucket.GSI3PK = $"COMPANY#{bucket.CompanyId}";
+            bucket.GSI3PK = $"COMPANY#{bucket.TenantId}";
             
             await _context.SaveAsync(bucket);
             

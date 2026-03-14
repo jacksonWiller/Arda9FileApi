@@ -11,17 +11,20 @@ public class MoveFileCommandHandler : IRequestHandler<MoveFileCommand, Result<Mo
     private readonly IFileRepository _repository;
     private readonly IFolderRepository _folderRepository;
     private readonly IS3Service _s3Service;
+    private readonly ICurrentUserService _currentUserService;
     private readonly ILogger<MoveFileCommandHandler> _logger;
 
     public MoveFileCommandHandler(
         IFileRepository repository,
         IFolderRepository folderRepository,
         IS3Service s3Service,
+        ICurrentUserService currentUserService,
         ILogger<MoveFileCommandHandler> logger)
     {
         _repository = repository;
         _folderRepository = folderRepository;
         _s3Service = s3Service;
+        _currentUserService = currentUserService;
         _logger = logger;
     }
 
@@ -29,18 +32,33 @@ public class MoveFileCommandHandler : IRequestHandler<MoveFileCommand, Result<Mo
     {
         try
         {
+            // Extrair TenantId e UserId do token JWT
+            var tenantId = _currentUserService.GetTenantId();
+            if (tenantId == Guid.Empty)
+            {
+                _logger.LogWarning("TenantId not found in token");
+                return Result<MoveFileResponse>.Error("TenantId not found in token");
+            }
+
+            var userId = _currentUserService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("UserId not found in token");
+                return Result<MoveFileResponse>.Error("UserId not found in token");
+            }
+
             var file = await _repository.GetByIdAsync(request.FileId);
-            
+
             if (file == null || file.IsDeleted)
             {
                 _logger.LogWarning("File {FileId} not found", request.FileId);
                 return Result<MoveFileResponse>.NotFound();
             }
 
-            if (file.CompanyId != request.TenantId)
+            if (file.TenantId != tenantId)
             {
                 _logger.LogWarning("File {FileId} does not belong to tenant {TenantId}", 
-                    request.FileId, request.TenantId);
+                    request.FileId, tenantId);
                 return Result<MoveFileResponse>.Forbidden();
             }
 
@@ -67,10 +85,10 @@ public class MoveFileCommandHandler : IRequestHandler<MoveFileCommand, Result<Mo
                     return Result<MoveFileResponse>.NotFound("Target folder not found");
                 }
 
-                if (folder.CompanyId != request.TenantId)
+                if (folder.TenantId != tenantId)
                 {
                     _logger.LogWarning("Target folder {FolderId} does not belong to tenant {TenantId}", 
-                        request.FolderId, request.TenantId);
+                        request.FolderId, tenantId);
                     return Result<MoveFileResponse>.Forbidden();
                 }
 

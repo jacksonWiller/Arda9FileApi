@@ -50,8 +50,8 @@ public class GetAllBucketsHandlerTests
 
         var dynamoBuckets = new List<BucketModel>
         {
-            new BucketModel { Id = Guid.NewGuid(), BucketName = "bucket1", CompanyId = Guid.NewGuid() },
-            new BucketModel { Id = Guid.NewGuid(), BucketName = "bucket2", CompanyId = Guid.NewGuid() }
+            new BucketModel { Id = Guid.NewGuid(), BucketName = "bucket1", TenantId = Guid.NewGuid() },
+            new BucketModel { Id = Guid.NewGuid(), BucketName = "bucket2", TenantId = Guid.NewGuid() }
         };
 
         _s3ClientMock.Setup(s => s.ListBucketsAsync(default))

@@ -31,7 +31,7 @@ public class GetFileByIdQueryHandler : IRequestHandler<GetFileByIdQuery, Result<
                 return Result<FileMetadataModel>.NotFound();
             }
 
-            if (file.CompanyId != request.TenantId)
+            if (file.TenantId != request.TenantId)
             {
                 _logger.LogWarning("File {FileId} does not belong to tenant {TenantId}", 
                     request.FileId, request.TenantId);

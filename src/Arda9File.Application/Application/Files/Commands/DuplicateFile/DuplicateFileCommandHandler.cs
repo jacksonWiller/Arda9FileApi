@@ -1,9 +1,10 @@
-using Ardalis.Result;
-using MediatR;
-using Arda9FileApi.Repositories;
-using Microsoft.Extensions.Logging;
+using Arda9File.Application.Application.Buckets.Commands.CreateBucket;
 using Arda9File.Application.Services;
 using Arda9File.Domain.Models;
+using Arda9FileApi.Repositories;
+using Ardalis.Result;
+using MediatR;
+using Microsoft.Extensions.Logging;
 
 namespace Arda9File.Application.Application.Files.Commands.DuplicateFile;
 
@@ -12,17 +13,20 @@ public class DuplicateFileCommandHandler : IRequestHandler<DuplicateFileCommand,
     private readonly IFileRepository _repository;
     private readonly IFolderRepository _folderRepository;
     private readonly IS3Service _s3Service;
+    private readonly ICurrentUserService _currentUserService;
     private readonly ILogger<DuplicateFileCommandHandler> _logger;
 
     public DuplicateFileCommandHandler(
         IFileRepository repository,
         IFolderRepository folderRepository,
         IS3Service s3Service,
+        ICurrentUserService currentUserService,
         ILogger<DuplicateFileCommandHandler> logger)
     {
         _repository = repository;
         _folderRepository = folderRepository;
         _s3Service = s3Service;
+        _currentUserService = currentUserService;
         _logger = logger;
     }
 
@@ -30,18 +34,33 @@ public class DuplicateFileCommandHandler : IRequestHandler<DuplicateFileCommand,
     {
         try
         {
+            // Extrair TenantId e UserId do token JWT
+            var tenantId = _currentUserService.GetTenantId();
+            if (tenantId == Guid.Empty)
+            {
+                _logger.LogWarning("TenantId not found in token");
+                return Result.Error("TenantId not found in token");
+            }
+
+            var userId = _currentUserService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("UserId not found in token");
+                return Result.Error("UserId not found in token");
+            }
+
             var originalFile = await _repository.GetByIdAsync(request.FileId);
-            
+
             if (originalFile == null || originalFile.IsDeleted)
             {
                 _logger.LogWarning("File {FileId} not found", request.FileId);
-                return Result<DuplicateFileResponse>.NotFound();
+                return Result.NotFound();
             }
 
-            if (originalFile.CompanyId != request.TenantId)
+            if (originalFile.TenantId != tenantId)
             {
                 _logger.LogWarning("File {FileId} does not belong to tenant {TenantId}", 
-                    request.FileId, request.TenantId);
+                    request.FileId, tenantId);
                 return Result<DuplicateFileResponse>.Forbidden();
             }
 
@@ -58,10 +77,10 @@ public class DuplicateFileCommandHandler : IRequestHandler<DuplicateFileCommand,
                     return Result<DuplicateFileResponse>.NotFound("Target folder not found");
                 }
 
-                if (folder.CompanyId != request.TenantId)
+                if (folder.TenantId != tenantId)
                 {
                     _logger.LogWarning("Target folder {FolderId} does not belong to tenant {TenantId}", 
-                        targetFolderId, request.TenantId);
+                        targetFolderId, tenantId);
                     return Result<DuplicateFileResponse>.Forbidden();
                 }
 
@@ -116,7 +135,7 @@ public class DuplicateFileCommandHandler : IRequestHandler<DuplicateFileCommand,
                 Size = originalFile.Size,
                 Folder = targetFolderPath,
                 FolderId = targetFolderId,
-                CompanyId = originalFile.CompanyId,
+                TenantId = originalFile.TenantId,
                 SubCompanyId = originalFile.SubCompanyId,
                 UploadedBy = originalFile.UploadedBy,
                 IsPublic = originalFile.IsPublic,

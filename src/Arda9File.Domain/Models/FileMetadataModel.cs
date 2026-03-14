@@ -48,7 +48,7 @@ public class FileMetadataModel : DynamoSingleTableEntity
     public Guid? FolderId { get; set; }
 
     [DynamoDBProperty("CompanyId")]
-    public Guid CompanyId { get; set; }
+    public Guid TenantId { get; set; }
 
     [DynamoDBProperty("SubCompanyId")]
     public Guid? SubCompanyId { get; set; }

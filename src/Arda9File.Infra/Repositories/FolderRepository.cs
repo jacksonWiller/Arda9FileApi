@@ -128,7 +128,7 @@ public class FolderRepository : IFolderRepository
         }
     }
 
-    public async Task<List<FolderModel>> GetByCompanyIdAsync(Guid companyId)
+    public async Task<List<FolderModel>> GetByTenantIdAsync(Guid companyId)
     {
         try
         {
@@ -163,7 +163,7 @@ public class FolderRepository : IFolderRepository
             // Definir GSIs
             folder.GSI1PK = $"BUCKET#{folder.BucketId}";
             folder.GSI1SK = $"FOLDER#{folder.Id}";
-            folder.GSI3PK = $"COMPANY#{folder.CompanyId}";
+            folder.GSI3PK = $"COMPANY#{folder.TenantId}";
 
             // Salvar no DynamoDB
             await _context.SaveAsync(folder);
@@ -195,7 +195,7 @@ public class FolderRepository : IFolderRepository
             // Atualizar GSIs
             folder.GSI1PK = $"BUCKET#{folder.BucketId}";
             folder.GSI1SK = $"FOLDER#{folder.Id}";
-            folder.GSI3PK = $"COMPANY#{folder.CompanyId}";
+            folder.GSI3PK = $"COMPANY#{folder.TenantId}";
             
             // Salvar pasta atualizada no DynamoDB
             await _context.SaveAsync(folder);

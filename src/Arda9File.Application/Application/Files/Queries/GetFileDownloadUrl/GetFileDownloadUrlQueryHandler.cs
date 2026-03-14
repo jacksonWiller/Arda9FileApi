@@ -34,7 +34,7 @@ public class GetFileDownloadUrlQueryHandler : IRequestHandler<GetFileDownloadUrl
                 return Result<GetFileDownloadUrlResponse>.NotFound();
             }
 
-            if (file.CompanyId != request.TenantId)
+            if (file.TenantId != request.TenantId)
             {
                 _logger.LogWarning("File {FileId} does not belong to tenant {TenantId}", 
                     request.FileId, request.TenantId);

@@ -1,5 +1,6 @@
 using Arda9File.Domain.Models;
 using Arda9File.Domain.Repositories;
+using Arda9File.Application.Services;
 using Arda9FileApi.Repositories;
 using Ardalis.Result;
 using MediatR;
@@ -11,15 +12,18 @@ public class CreateFolderCommandHandler : IRequestHandler<CreateFolderCommand, R
 {
     private readonly IFolderRepository _repository;
     private readonly IBucketRepository _bucketRepository;
+    private readonly ICurrentUserService _currentUserService;
     private readonly ILogger<CreateFolderCommandHandler> _logger;
 
     public CreateFolderCommandHandler(
         IFolderRepository repository,
         IBucketRepository bucketRepository,
+        ICurrentUserService currentUserService,
         ILogger<CreateFolderCommandHandler> logger)
     {
         _repository = repository;
         _bucketRepository = bucketRepository;
+        _currentUserService = currentUserService;
         _logger = logger;
     }
 
@@ -27,11 +31,26 @@ public class CreateFolderCommandHandler : IRequestHandler<CreateFolderCommand, R
     {
         try
         {
+            // Extrair TenantId e UserId do token JWT
+            var tenantId = _currentUserService.GetTenantId();
+            if (tenantId == Guid.Empty)
+            {
+                _logger.LogWarning("TenantId not found in token");
+                return Result<CreateFolderResponse>.Error("TenantId not found in token");
+            }
+
+            var userId = _currentUserService.GetUserId();
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("UserId not found in token");
+                return Result<CreateFolderResponse>.Error("UserId not found in token");
+            }
+
             // Verificar se o bucket existe
             var bucket = await _bucketRepository.GetByIdAsync(request.BucketId);
             if (bucket == null)
             {
-                _logger.LogWarning("Bucket {BucketId} not found for company {CompanyId}", request.BucketId, request.TenantId);
+                _logger.LogWarning("Bucket {BucketId} not found for company {TenantId}", request.BucketId, tenantId);
                 return Result<CreateFolderResponse>.Error();
             }
 
@@ -75,8 +94,8 @@ public class CreateFolderCommandHandler : IRequestHandler<CreateFolderCommand, R
                 BucketId = request.BucketId,
                 Path = fullPath,
                 ParentFolderId = request.ParentFolderId,
-                CompanyId = request.TenantId,
-                CreatedBy = request.CreatedBy,
+                TenantId = tenantId,
+                CreatedBy = Guid.TryParse(userId, out var userGuid) ? userGuid : null,
                 IsPublic = request.IsPublic,
                 CreatedAt = DateTime.UtcNow,
                 IsDeleted = false

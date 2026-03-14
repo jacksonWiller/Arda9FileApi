@@ -6,7 +6,7 @@ namespace Arda9File.Domain.Models;
 /// <summary>
 /// DTO for Bucket with DynamoDB single table design
 /// PK: BUCKET#{BucketId}, SK: METADATA
-/// GSI3: COMPANY#{CompanyId} -> Lista buckets por empresa
+/// GSI3: COMPANY#{TenantId} -> Lista buckets por empresa
 /// </summary>
 [DynamoDBTable("arda9-file-v3")]
 public class BucketModel : DynamoSingleTableEntity
@@ -25,10 +25,7 @@ public class BucketModel : DynamoSingleTableEntity
     public string BucketName { get; set; } = string.Empty;
 
     [DynamoDBProperty]
-    public Guid CompanyId { get; set; }
-
-    [DynamoDBProperty]
-    public Guid? SubCompanyId { get; set; }
+    public Guid TenantId { get; set; }
 
     [DynamoDBProperty]
     public string Region { get; set; } = string.Empty;

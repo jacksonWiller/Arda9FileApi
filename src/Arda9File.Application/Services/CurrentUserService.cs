@@ -20,14 +20,38 @@ public class CurrentUserService : ICurrentUserService
             return Guid.Empty;
         }
 
+        // Tentar buscar do custom attribute primeiro
         var tenantIdClaim = httpContext.User.FindFirst("custom:tenantId")?.Value;
-        
-        if (string.IsNullOrEmpty(tenantIdClaim) || !Guid.TryParse(tenantIdClaim, out var tenantId))
+
+        if (!string.IsNullOrEmpty(tenantIdClaim) && Guid.TryParse(tenantIdClaim, out var tenantId))
+        {
+            return tenantId;
+        }
+
+        // Extrair do username do Cognito (formato: {tenancyId}#{email})
+        var username = httpContext.User.FindFirst("cognito:username")?.Value 
+                      ?? httpContext.User.FindFirst("username")?.Value;
+
+        if (string.IsNullOrEmpty(username))
         {
             return Guid.Empty;
         }
 
-        return tenantId;
+        // Parse do formato: 3590021ab8114b6e97f6bc385072b127#jacksonwillerduarte@gmail.com
+        var parts = username.Split('#');
+        if (parts.Length != 2)
+        {
+            return Guid.Empty;
+        }
+
+        var tenancyIdString = parts[0];
+
+        if (string.IsNullOrEmpty(tenancyIdString) || !Guid.TryParse(tenancyIdString, out var tenancyId))
+        {
+            return Guid.Empty;
+        }
+
+        return tenancyId;
     }
 
     public string? GetUserId()

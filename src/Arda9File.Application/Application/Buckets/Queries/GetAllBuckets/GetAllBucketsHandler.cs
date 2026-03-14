@@ -33,7 +33,7 @@ public class GetAllBucketsHandler : IRequestHandler<GetAllBucketsQuery, Result<G
             // Buscar todos os buckets do S3d
             var s3Response = await _s3Client.ListBucketsAsync(cancellationToken);
 
-            // Buscar metadados do DynamoDB
+            // Buscar metadados do DynamoDBf
             var dynamoBuckets = await _bucketRepository.GetAllAsync();
 
             // Criar um dicionário para lookup rápido

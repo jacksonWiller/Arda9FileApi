@@ -56,7 +56,7 @@ public class FileRepository : IFileRepository
         }
     }
 
-    public async Task<List<FileMetadataModel>> GetByCompanyIdAsync(Guid companyId)
+    public async Task<List<FileMetadataModel>> GetByTenantIdAsync(Guid companyId)
     {
         try
         {
@@ -185,7 +185,7 @@ public class FileRepository : IFileRepository
                 fileMetadata.GSI2SK = $"FILE#{fileMetadata.FileId}";
             }
 
-            fileMetadata.GSI3PK = $"COMPANY#{fileMetadata.CompanyId}";
+            fileMetadata.GSI3PK = $"COMPANY#{fileMetadata.TenantId}";
 
             // Salvar o arquivo no DynamoDB
             await _context.SaveAsync(fileMetadata);
@@ -229,7 +229,7 @@ public class FileRepository : IFileRepository
                 fileMetadata.GSI2SK = string.Empty;
             }
 
-            fileMetadata.GSI3PK = $"COMPANY#{fileMetadata.CompanyId}";
+            fileMetadata.GSI3PK = $"COMPANY#{fileMetadata.TenantId}";
             
             // Salvar arquivo atualizado no DynamoDB
             await _context.SaveAsync(fileMetadata);

@@ -30,7 +30,7 @@ public class GetFoldersByParentQueryHandler : IRequestHandler<GetFoldersByParent
                 return Result<List<FolderModel>>.NotFound();
             }
 
-            if (parentFolder.CompanyId != request.TenantId)
+            if (parentFolder.TenantId != request.TenantId)
             {
                 _logger.LogWarning("Parent folder {ParentFolderId} does not belong to tenant {TenantId}", 
                     request.ParentFolderId, request.TenantId);
