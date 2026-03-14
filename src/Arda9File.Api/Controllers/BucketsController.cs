@@ -1,6 +1,7 @@
 using System.Net.Mime;
 using Arda9File.Application.Application.Buckets.Commands.CreateBucket;
 using Arda9File.Application.Application.Buckets.Commands.DeleteBucket;
+using Arda9File.Application.Application.Buckets.Commands.DeleteBucketById;
 using Arda9File.Application.Application.Buckets.Queries.GetAllBuckets;
 using Arda9File.Application.Application.Buckets.Queries.GetBucketById;
 using Core.Api.Extensions;
@@ -97,6 +98,30 @@ public class BucketsController : ControllerBase
         var command = new DeleteBucketCommand 
         { 
             BucketName = bucketName,
+            ForceDelete = forceDelete
+        };
+        var result = await _mediator.Send(command);
+        return result.ToActionResult();
+    }
+
+    /// <summary>
+    /// Deleta um bucket por ID
+    /// </summary>
+    /// <param name="id">ID do bucket</param>
+    /// <param name="forceDelete">Se true, deleta todos os objetos antes de deletar o bucket</param>
+    /// <returns>Status da operação</returns>
+    /// <response code="204">Bucket deletado com sucesso</response>
+    /// <response code="404">Bucket não encontrado</response>
+    /// <response code="500">Erro interno</response>
+    [HttpDelete("id/{id}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+    public async Task<IActionResult> DeleteBucketByIdAsync(Guid id, [FromQuery] bool forceDelete = false)
+    {
+        var command = new DeleteBucketByIdCommand 
+        { 
+            Id = id,
             ForceDelete = forceDelete
         };
         var result = await _mediator.Send(command);
